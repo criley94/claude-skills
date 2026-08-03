@@ -68,6 +68,31 @@ def test_check_plugin_presence_finds_installed(setup_module: ModuleType, tmp_pat
     assert "cartographer@cartographer-marketplace" in missing
 
 
+def test_check_plugin_presence_matches_other_marketplace(
+    setup_module: ModuleType, tmp_path: Path
+) -> None:
+    """The same plugin installed from a DIFFERENT marketplace satisfies the requirement.
+
+    Observed in the field: superpowers installed as superpowers@superpowers-marketplace
+    while REQUIRED_PLUGINS names superpowers@claude-plugins-official — the plugin is
+    functionally present, so the check must not hard-block on the marketplace suffix.
+    """
+    installed = {
+        "version": 2,
+        "plugins": {
+            "superpowers@superpowers-marketplace": [{"version": "5.1.0", "scope": "user"}],
+        },
+    }
+    p = tmp_path / "installed_plugins.json"
+    p.write_text(json.dumps(installed), encoding="utf-8")
+    present, missing = setup_module.check_plugin_presence(
+        installed_path=p,
+        required={"superpowers@claude-plugins-official"},
+    )
+    assert "superpowers@claude-plugins-official" in present
+    assert not missing
+
+
 def test_check_plugin_presence_missing_file(setup_module: ModuleType, tmp_path: Path) -> None:
     """If installed_plugins.json doesn't exist, every required plugin is reported missing."""
     present, missing = setup_module.check_plugin_presence(

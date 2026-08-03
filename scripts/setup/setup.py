@@ -456,10 +456,22 @@ def ensure_playwright(check_only: bool, force: bool) -> tuple[str, str, str | No
 # ---- Plugin presence ---------------------------------------------------------
 
 
+def _plugin_name(plugin_id: str) -> str:
+    """The name portion of a `name@marketplace` plugin id."""
+    return plugin_id.split("@", 1)[0]
+
+
 def check_plugin_presence(
     installed_path: Path, required: set[str]
 ) -> tuple[set[str], set[str]]:
-    """Return (present, missing). Missing path counts every required as missing."""
+    """Return (present, missing). Missing path counts every required as missing.
+
+    A required plugin counts as present when an installed key matches the full
+    `name@marketplace` id OR just the plugin name — the same plugin installed
+    from a different marketplace (e.g. superpowers@superpowers-marketplace vs
+    the required superpowers@claude-plugins-official) still satisfies the
+    prerequisite; the marketplace suffix only matters for the install hint.
+    """
     if not installed_path.exists():
         return set(), set(required)
     try:
@@ -467,8 +479,11 @@ def check_plugin_presence(
     except json.JSONDecodeError:
         return set(), set(required)
     installed_keys = set((data.get("plugins") or {}).keys())
-    present = required & installed_keys
-    missing = required - installed_keys
+    installed_names = {_plugin_name(k) for k in installed_keys}
+    present = {
+        r for r in required if r in installed_keys or _plugin_name(r) in installed_names
+    }
+    missing = required - present
     return present, missing
 
 
