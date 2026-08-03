@@ -7,6 +7,7 @@ from tests.helpers import frontmatter
 
 EXPECTED_COMMANDS: set[str] = {
     "architect-team",
+    "skiff",
     "architect-team-setup",
     "visual-qa",
     "mempalace-install",

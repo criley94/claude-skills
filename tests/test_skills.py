@@ -7,6 +7,7 @@ from tests.helpers import frontmatter
 
 EXPECTED_SKILLS: set[str] = {
     "architect-team-pipeline",
+    "skiff-pipeline",
     "intake-and-mapping",
     "reuse-first-design",
     "frontend-route-mapping",
