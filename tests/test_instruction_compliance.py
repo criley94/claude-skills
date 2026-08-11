@@ -400,9 +400,9 @@ ENFORCE_ZERO_COMPLIANCE_FINDINGS = True
 
 def test_engine_runs_over_the_real_in_scope_set() -> None:
     result = ic.assess_instruction_files(REPO_ROOT)
-    # 49 SKILL.md + 39 agents + 24 commands + CLAUDE.md + 2 maps = 115.
-    # (v3.40.0: +1 skill `skiff-pipeline`, +1 command `skiff`.)
-    assert result["files_checked"] == 115, result["files_checked"]
+    # 50 SKILL.md + 39 agents + 25 commands + CLAUDE.md + 2 maps = 117.
+    # (v3.41.0: +1 skill `expo-standalone-app-build`, +1 command of the same name.)
+    assert result["files_checked"] == 117, result["files_checked"]
     assert isinstance(result["findings"], list)
 
 

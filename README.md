@@ -15,7 +15,7 @@
           ██    ██      ██   ██ ██  ██  ██           ██ ██  ██ ██
           ██    ███████ ██   ██ ██      ██      ███████ ██ ██   ██
 
-                        ─── C T 6 ───   v 3 . 40 . 0
+                        ─── C T 6 ───   v 3 . 41 . 0
 ```
 
 > **CLAUDE TEAM SIX (CT6)** — spec-to-production multi-agent coding pipeline
@@ -36,7 +36,7 @@
 > `/architect-team`, `/architect-team:bug-fix`, `/architect-team:mini`,
 > `/architect-team:inject`). CLAUDE TEAM SIX is the user-facing name.
 
-![version](https://img.shields.io/badge/version-3.40.0-2563EB?style=flat-square)
+![version](https://img.shields.io/badge/version-3.41.0-2563EB?style=flat-square)
 ![license](https://img.shields.io/badge/license-MIT-3FB950?style=flat-square)
 ![tests](https://img.shields.io/badge/tests-5531%20passing-3FB950?style=flat-square)
 ![claude code](https://img.shields.io/badge/Claude%20Code-plugin-7C3AED?style=flat-square)
@@ -556,7 +556,7 @@ Two owner-directed deliverables on one branch: **the dev loop now runs unbounded
 ```
 
 ```
-┌─ SKILLS (49) ───────────────────────┬─ AGENTS (39) ─────────────────────────┐
+┌─ SKILLS (50) ───────────────────────┬─ AGENTS (39) ─────────────────────────┐
 │ ◇ architect-team-pipeline           │ ◆ system-architect (fable)            │
 │ ◇ intake-and-mapping                │ ◆ frontend (fable)                    │
 │ ◇ reuse-first-design                │ ◆ backend (fable)                     │
@@ -614,7 +614,8 @@ Two owner-directed deliverables on one branch: **the dev loop now runs unbounded
 │ ◇ token-compression (v3.22.0)       │                                       │
 │ ◇ claude-design-import (v3.33.0)    │                                       │
 │ ◇ skiff-pipeline (v3.40.0)          │                                       │
-├─ COMMANDS (24) ─────────────────────┴───────────────────────────────────────┤
+│ ◇ expo-standalone-app-build        *│                                       │
+├─ COMMANDS (25) ─────────────────────┴───────────────────────────────────────┤
 │ ▸ /architect-team <path-to-requirements-folder | free-text prompt>          │
 │ ▸ /architect-team:architect-team-setup                                      │
 │ ▸ /architect-team:visual-qa [<codebase-path>]                               │
@@ -1608,7 +1609,8 @@ Tests validate: plugin/marketplace JSON; all 49 skill frontmatters; all 39 agent
            v3.37.0 ─ gateway auto-registration — the installer registers + starts the gateway itself, user-level on every OS (`schtasks onlogon` + a Startup-folder-shim fallback + a detached start-now spawner / `systemctl --user` with a `default.target` unit / a LaunchAgents plist), never sudo; `--no-register` opts back to the printed hint; a failure degrades to the hint (never gates); uninstall stops + unregisters symmetrically; `status` gains `registered=` (v3.37.1 PATCH: setup's gateway loader registers the module in `sys.modules` before exec, so the `--external-llm` setup row actually loads)
            v3.38.0 ─ setup asks for missing keys — ask-then-apply, never punt-to-script: the setup + librarian-install wrappers ask in-session on an absent-key state (AskUserQuestion — capture-and-apply with the `--yes`→`--activate` carry-over, or an explicit decline recorded via the new `decline` subcommand); the gateway + librarian installers prompt themselves on a real interactive TTY (hidden getpass entry, blank-to-skip, interrupt-skips); a per-key `key-declines.json` record auto-resets on key resolution (`--re-ask-keys` clears; `status` reports `declined=`; `uninstall --purge` symmetric); all 11 `scripts/setup/*.py` dispositioned (REQ-005) — non-user-holdable remediations stay printed; +56 hermetic tests; suite → 5465 passing + 5 skipped
            v3.39.1 ─ living-docs current-state refresh — docs-only PATCH on v3.39.0: 12 stale README/map assertions corrected; the class-general derive-and-compare detector retained as a standalone regression artifact; counts unchanged at 48 skills / 39 agents / 23 commands
-   ◆       v3.40.0 ─ skiff, the light lane — a fourth pipeline for small builds: nothing starts until the user types a go word that changes every run (picked by `random.SystemRandom`, never by the model, so it can't be typed from muscle memory); every helper's model is looked up from a fixed 39-role table under an Opus 5 ceiling enforced at dispatch, never reasoned about at runtime; three failures STOP and report rather than silently handing the work to the 26-agent pipeline — escalation is announced, branch-isolated, and only happens if the user asked for it up front. Cold-start path needs no test suite, no dev URL, no git remote. NO agent file edited (a `model:` line is a default, not a lock). Ships the repo's first glossary + quickstart; counts 49 skills / 39 agents / 24 commands; suite 5531 passing + 2 skipped across 200 test files (current)
+   ◆       v3.41.0 ─ expo standalone app build — a React target that ships to the App Store and Google Play through EAS. The pipeline's default frontend hand (Vite, Tailwind, shadcn, `<div>`) builds a competent web app that cannot be built for a phone and reports success; this makes the Expo target explicit and enforceable. Three checks ordered by what each can PROVE: lint (the only one that catches `<div>`/`localStorage` — export never runs the code and the browser is where they still work), `expo export` for both platforms, and Playwright against `expo start --web` (React Native Web keeps the existing Phase 5 gate satisfiable unchanged). A `PreToolUse` guard is the third layer and the only one needing no cooperation — it refuses the write, and stays silent on `*.web.tsx` / `'use dom'` / e2e files. Honest boundary: three green checks mean valid-and-behaving, NOT ready-to-ship — layout, safe areas, and keyboard occlusion are undetectable on Linux. Also: all 39 agents `fable` → `opus` (Opus-only directive). Counts 50 skills / 39 agents / 25 commands; suite 5572 passing + 2 skipped (current)
+   ◆       v3.40.0 ─ skiff, the light lane — a fourth pipeline for small builds: nothing starts until the user types a go word that changes every run (picked by `random.SystemRandom`, never by the model, so it can't be typed from muscle memory); every helper's model is looked up from a fixed 39-role table under an Opus 5 ceiling enforced at dispatch, never reasoned about at runtime; three failures STOP and report rather than silently handing the work to the 26-agent pipeline — escalation is announced, branch-isolated, and only happens if the user asked for it up front. Cold-start path needs no test suite, no dev URL, no git remote. NO agent file edited (a `model:` line is a default, not a lock). Ships the repo's first glossary + quickstart; counts 49 skills / 39 agents / 24 commands; suite 5531 passing + 2 skipped across 200 test files
 
    ▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
 ```
