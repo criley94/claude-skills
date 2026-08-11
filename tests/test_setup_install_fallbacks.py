@@ -516,7 +516,7 @@ def test_apply_model_policy_targets_the_runtime_agents_dir(
     assert lever.policy_state(installed) == "codex-split"
     # the repo's own tracked agents/ stayed on the committed ship state
     repo_agents = Path(__file__).resolve().parents[1] / "agents"
-    assert lever.policy_state(repo_agents) == "uniform-fable"
+    assert lever.policy_state(repo_agents) == "uniform-opus"
 
 
 def _wired_main(setup_module: ModuleType, tmp_path: Path, argv: list[str]):
