@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.41.0] — 2026-08-11 — Expo standalone app build (a React target that ships to the App Store and Google Play) + Opus-only agents
+
+### Added
+
+- **`expo-standalone-app-build` skill + `/architect-team:expo-standalone-app-build` command.** The pipeline's default frontend hand — Vite, Tailwind, shadcn/ui, `react-router-dom`, `<div>` — produces a competent web app that cannot be built for a phone, and reports success. This skill makes an Expo delivery target explicit and enforceable. It carries the technology contract (the structurally-impossible-on-a-phone table and its React Native replacements), the required project files (`app.json` / `eas.json` / icon / splash with real, non-placeholder app IDs), the per-phase pipeline integration, and a red-flags table for the rationalizations that precede a violation.
+- **Three completion checks, ordered by what each can actually prove.** (1) `npx expo lint` against `eslint-config-expo` plus a ban set — lowercase JSX tags, browser globals, web-only imports, raw text outside `<Text>`. (2) `npx expo export --platform ios|android` — proves the project assembles as a real Expo app. (3) Playwright against `npx expo start --web`, which satisfies the existing Phase 5 gate unchanged, because React Native Web makes the app a real running browser target. The ordering matters: export never executes the code and the browser is precisely where `<div>` and `localStorage` still work, so **only check 1 can catch the defect class that crashes on first launch.**
+- **`hooks/pretool_expo_guard.py` — a `PreToolUse` guard on Write / Edit / NotebookEdit.** The third enforcement layer, and the only one requiring no cooperation from the agent: it refuses the write outright rather than catching the violation afterward. Detects an Expo project by walking up for `app.json` with an `expo` key or a `package.json` with an `expo` dependency; scans comment-stripped content for HTML elements, browser globals, and forbidden imports; reports every violation with its React Native replacement. Deliberately narrow — silent outside Expo projects, on `*.web.tsx` platform targets, on `'use dom'` WebView components, on `node_modules` / build output, and on test/e2e files that legitimately drive a real browser. New `tests/test_expo_guard_hook.py` (32 cases) pins both directions; the negative cases matter as much as the positive ones, since a false positive halts a build team mid-run.
+- **Setup-before-build ordering, as a hard requirement.** Installing the contract as a task *inside* the build run is circular — an agent would have to already be following the skill to install the thing that enforces it. The command runs first and installs the project's `CLAUDE.md` contract section and the lint config; implementation follows.
+
+### Changed
+
+- **Opus-only agents (owner directive).** All 39 `agents/*.md` move `model: fable` → `model: opus`; no spawned agent runs on a cheaper tier unless explicitly specified. The 23 ship-state pins asserting `fable` across 19 test files were flipped to `opus`, misleading test function names renamed (`test_agent_model_is_fable` → `..._is_opus`), and the two "committed ship state" proxies updated (`policy_state` → `uniform-opus`). The `set_default_model.py` lever, the codex-split policy, and the gateway tests are untouched — those exercise the switching machinery against synthetic trees and legitimately keep their own model values.
+- `tests/test_unilateral_override_discipline.py::test_pretool_hook_uses_guardrail_script` generalized from one-script-per-matcher to a sanctioned-set-per-matcher assertion, now that the three edit matchers wire both the unilateral-override guard and the expo guard. It additionally pins that each required guard is actually present, so the looser check cannot silently permit a missing hook.
+
+### Honest boundary
+
+Three green checks mean the project is a structurally valid Expo app that EAS will accept, carries no web-only code the rules cover, and behaves as specified. They do **not** mean it is ready to ship. Layout on a real screen, safe areas, keyboard occlusion, touch targets, and on-device performance are invisible to all three and are not detectable on a Linux build machine. A passing run has never been seen on a phone; the accurate statement is *"valid Expo project, all three checks green, not yet run on a device."* Binary, store listing, and submission belong to the on-device release process.
+
+### Counts
+
+Skills 49 → **50**, commands 24 → **25**, agents 39 (unchanged), hook enforcement scripts 7 → **8**. Suite **5572 passing + 2 skipped**.
+
 ## [3.40.0] — 2026-08-03 — `skiff`, the light lane (consented spend + a gate that cannot be passed by reflex)
 
 **MINOR — a fourth pipeline, `/architect-team:skiff`, for small builds on small projects: nothing starts until the user types a go word that changes every run, every helper's model is looked up from a fixed table under an Opus 5 ceiling, and three failed attempts STOP rather than silently handing the work to the 26-agent pipeline.** The owner's framing: the existing tool "spins up CRAZY amounts of top tier teams" and is "built for more corporate-level, hardened solutions" — correct for high-stakes work, overkill for what he and his son build. Source spec: a Sextant evidence run (`20260803T195613Z`) whose every finding carries a verbatim anchor quote verified against this repo.

@@ -103,25 +103,38 @@ def test_pretool_hook_registered_in_hooks_json() -> None:
 
 
 def test_pretool_hook_uses_guardrail_script() -> None:
-    # Two PreToolUse hooks now coexist, each on its own matcher: the v3.0.0
-    # unilateral-override guard on Edit/Write/NotebookEdit (source-edit bypass),
-    # and the skill-invocation hard-gate on the "*" matcher (real-time skill
-    # enforcement). Assert each matcher routes to the correct script.
+    # Several PreToolUse hooks now coexist. The "*" matcher carries the
+    # skill-invocation hard-gate (real-time skill enforcement). The three
+    # edit matchers carry BOTH the v3.0.0 unilateral-override guard (source-edit
+    # bypass) and the v3.41.0 expo guard (web-only code entering an Expo
+    # project). A matcher may route to more than one script, but only to
+    # sanctioned ones -- assert the allowed set per matcher, and pin that each
+    # required guard is actually wired.
     hooks = json.loads((REPO_ROOT / "hooks" / "hooks.json").read_text(encoding="utf-8"))
+    edit_guards = {"pretool_unilateral_override_guard.py", "pretool_expo_guard.py"}
     expected_by_matcher = {
-        "Edit": "pretool_unilateral_override_guard.py",
-        "Write": "pretool_unilateral_override_guard.py",
-        "NotebookEdit": "pretool_unilateral_override_guard.py",
-        "*": "pretool_skill_gate.py",
+        "Edit": edit_guards,
+        "Write": edit_guards,
+        "NotebookEdit": edit_guards,
+        "*": {"pretool_skill_gate.py"},
     }
+    seen_by_matcher: dict[str, set[str]] = {}
     for entry in hooks["hooks"]["PreToolUse"]:
-        expected = expected_by_matcher.get(entry["matcher"])
-        assert expected is not None, f"unexpected PreToolUse matcher {entry['matcher']!r}"
+        allowed = expected_by_matcher.get(entry["matcher"])
+        assert allowed is not None, f"unexpected PreToolUse matcher {entry['matcher']!r}"
         for hook in entry["hooks"]:
-            assert expected in hook["command"], (
-                f"PreToolUse[{entry['matcher']}] should route to {expected}, "
-                f"got {hook['command']!r}"
+            script = hook["command"].rsplit("/", 1)[-1].rstrip('"')
+            assert script in allowed, (
+                f"PreToolUse[{entry['matcher']}] routes to unsanctioned {script!r}; "
+                f"allowed: {sorted(allowed)}"
             )
+            seen_by_matcher.setdefault(entry["matcher"], set()).add(script)
+
+    for matcher, required in expected_by_matcher.items():
+        assert seen_by_matcher.get(matcher) == required, (
+            f"PreToolUse[{matcher}] should wire exactly {sorted(required)}, "
+            f"got {sorted(seen_by_matcher.get(matcher, set()))}"
+        )
 
 
 def test_pretool_hook_uses_polyglot_python_pattern() -> None:

@@ -51,7 +51,7 @@ def test_canonical_commands_has_20_entries(audit_module) -> None:
     # 19 at review-remediation time; +1 (optimize-structure) in v3.11.0;
     # +1 (closeout) in v3.18.0; +1 (logit) in v3.21.0; +1 (librarian-install) in v3.29.0;
     # +1 (skiff) in v3.40.0.
-    assert len(audit_module.CANONICAL_COMMANDS) == 24
+    assert len(audit_module.CANONICAL_COMMANDS) == 25
 
 
 @pytest.mark.parametrize("phantom", ["mempalace-search", "mempalace-status", "code-review"])
