@@ -63,6 +63,7 @@ import json
 import os
 import re
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -91,6 +92,33 @@ DISABLE_OUTPUT_ENV = "CT6_TURN_OUTPUT_GATE_DISABLED"  # turn-output rule
 #: The injected task-root override. This is the TEST SEAM — the suite points it
 #: at a tmp_path so no test can reach the developer's real ``~/.claude/tasks``.
 TASKS_ROOT_ENV = "CT6_TASKS_ROOT"
+
+#: The task-abandonment window (v3.64.0, D1). Harness task lists OUTLIVE
+#: sessions — resume / continue / compact keeps the same store, teams keep the
+#: team store, and the harness carries lists across session forks — so an open
+#: task is not, by itself, evidence that THIS session has work to close. A
+#: field-reported wedge held every turn of a live workspace on four tasks whose
+#: owning sessions had been terminated days earlier, with no release except an
+#: env kill-switch. An open task whose FILE has gone untouched longer than this
+#: window is therefore INHERITED DEBT: surfaced in the block, never blocking.
+#: (Precedents: the run-marker staleness window — "an abandoned run's marker
+#: must not tax the workspace forever", review remediation #3 — and the
+#: v3.55.0 frontend-E2E pre-existing-debt split.)
+#:
+#: The mtime is the discriminator because it is the only HARNESS-WRITTEN time
+#: signal a task carries (the JSON has no timestamps, and the harness rewrites
+#: the file on every TaskUpdate — so working an inherited task revives it).
+#: Backdating an mtime through Bash remains the same NAMED residual every
+#: filesystem gate in this plugin carries.
+#:
+#: Defaults to the RESOLVED run-marker window (``CT6_RUN_MARKER_STALE_HOURS``,
+#: 72h): one abandonment lever unless the operator says otherwise. The
+#: dedicated override below is floored exactly like the marker's (the S-3
+#: lesson): a window that can be collapsed to nothing is a kill-switch that
+#: does not look like one.
+TASK_STALE_HOURS_ENV = "CT6_TASK_STALE_HOURS"
+MIN_TASK_STALE_HOURS = 1.0
+DEFAULT_TASK_STALE_HOURS = 72.0
 
 #: Statuses the harness writes for work that is NOT finished.
 OPEN_STATUSES = frozenset({"pending", "in_progress"})
@@ -310,6 +338,15 @@ def read_harness_tasks(
             continue
         item = dict(data)
         item["_path"] = str(path)
+        try:
+            # The harness rewrites the file on every TaskUpdate, so this is the
+            # last time the HARNESS moved the task — the abandonment signal D1
+            # reads. A stat failure leaves the key absent and the task LIVE:
+            # unknown is not abandoned, matching the lock's unknown-is-not-done
+            # asymmetry everywhere else.
+            item["_mtime"] = path.stat().st_mtime
+        except OSError:
+            pass
         result["items"].append(item)
     return result
 
@@ -339,6 +376,50 @@ def open_task_items(
             continue
         out.append(item)
     return out
+
+
+def task_stale_hours() -> float:
+    """The resolved task-abandonment window in hours.
+
+    ``CT6_TASK_STALE_HOURS`` when set to a positive number (floored at
+    :data:`MIN_TASK_STALE_HOURS`, the S-3 rule); otherwise the RESOLVED
+    run-marker window, so by default the two abandonment levers are one lever.
+    """
+    raw = os.environ.get(TASK_STALE_HOURS_ENV, "").strip()
+    try:
+        h = float(raw)
+    except ValueError:
+        h = 0.0
+    if h > 0:
+        return max(h, MIN_TASK_STALE_HOURS)
+    try:
+        return max(float(_rc.marker_stale_hours()), MIN_TASK_STALE_HOURS)
+    except Exception:
+        return DEFAULT_TASK_STALE_HOURS
+
+
+def partition_stale_tasks(
+    items: list[dict[str, Any]],
+    now: float | None = None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Split open tasks into ``(live, stale)`` by file age.
+
+    Stale = the harness has not touched the task file for longer than
+    :func:`task_stale_hours`. An item with no readable ``_mtime`` is LIVE —
+    unknown is not abandoned, and the conservative direction on this gate is
+    the blocking one. A future-dated mtime is trivially fresh.
+    """
+    ts = time.time() if now is None else float(now)
+    window = task_stale_hours() * 3600.0
+    live: list[dict[str, Any]] = []
+    stale: list[dict[str, Any]] = []
+    for item in items or []:
+        mtime = item.get("_mtime") if isinstance(item, dict) else None
+        if isinstance(mtime, (int, float)) and (ts - float(mtime)) > window:
+            stale.append(item)
+        else:
+            live.append(item)
+    return live, stale
 
 
 # --- the turn-output classifier ----------------------------------------------
@@ -1187,16 +1268,22 @@ def evaluate_completion_lock(
 ) -> dict[str, Any]:
     """Decide whether this session's Stop must be refused.
 
-    Returns ``{"blocked", "open_tasks", "open_asks", "unreadable",
-    "turn_output", "reasons", "killswitch"}``. Source problems are REPORTED in
-    ``unreadable`` (and block); only genuinely unexpected errors propagate to
-    ``main()``'s fail-open wrapper.
+    Returns ``{"blocked", "open_tasks", "stale_tasks", "tasks_dir",
+    "open_asks", "unreadable", "turn_output", "reasons", "killswitch"}``.
+    ``open_tasks`` holds only LIVE open work; ``stale_tasks`` holds open tasks
+    aged past the abandonment window (inherited debt — surfaced, never
+    blocking). Source problems are REPORTED in ``unreadable`` (and block); only
+    genuinely unexpected errors propagate to ``main()``'s fail-open wrapper.
 
     ``root`` is the workspace (the ask-ledger lives under it); ``tasks_root``
     injects the harness task store for tests.
     """
     result: dict[str, Any] = {
         "blocked": False, "open_tasks": [], "open_asks": [], "unreadable": [],
+        # D1 — open tasks aged past the abandonment window: inherited debt,
+        # surfaced but never blocking. `tasks_dir` names the store for the
+        # operator (a field report spent real time hunting the right dir).
+        "stale_tasks": [], "tasks_dir": None,
         # Recorded directives that are NOT refusing the stop. Surfaced by the
         # caller when something else blocks, so an outstanding ask is still
         # visible without being the thing that wedges the session.
@@ -1247,12 +1334,28 @@ def evaluate_completion_lock(
     # --- source 1: the harness task list
     if not tasks_disabled():
         read = read_harness_tasks(session_id, tasks_root)
+        result["tasks_dir"] = read.get("dir")
         if read["unreadable"]:
             result["unreadable"].extend(read["unreadable"])
             sources.add(DISABLE_TASKS_ENV)
         open_tasks = open_task_items(read["items"], owner=owner)
-        if open_tasks:
-            result["open_tasks"] = open_tasks
+        # D1 (v3.64.0) — abandonment discrimination. Task lists outlive
+        # sessions, so an open task untouched for longer than the abandonment
+        # window is INHERITED DEBT from a terminated or superseded session:
+        # surfaced (below, and as an advisory line in `reasons`), never
+        # blocking. Touching one through TaskUpdate rewrites its file, which
+        # makes it live again — reviving inherited work is one tool call, and
+        # from then on it holds the turn like any open task.
+        live_tasks, stale_tasks = partition_stale_tasks(open_tasks)
+        result["stale_tasks"] = stale_tasks
+        if stale_tasks:
+            result["advisory_notes"].append(
+                f"{len(stale_tasks)} inherited stale open task(s) untouched "
+                f"for longer than the {task_stale_hours():g}h abandonment "
+                f"window are NOT refusing this stop (see stale_tasks)"
+            )
+        if live_tasks:
+            result["open_tasks"] = live_tasks
             sources.add(DISABLE_TASKS_ENV)
 
     # --- source 2: the ask-ledger. Skipped for a teammate: the ledger holds the
@@ -1416,13 +1519,117 @@ def _cmd_resolve(root: str | Path, entry_id: str, evidence: str) -> int:
     return 0
 
 
+def _cmd_retire(
+    session: str,
+    reason: str,
+    task_ids: list[str],
+    tasks_root_arg: str | None,
+    force: bool,
+) -> int:
+    """Close an abandoned harness task list — the OPERATOR's surface (D2).
+
+    Symmetry argument: the run marker has ``--stand-down``; until v3.64.0 a
+    dead TASK LIST had nothing — the only exits were an env kill-switch or
+    hand-editing the store, and a field-reported workspace sat wedged on
+    exactly that gap. Retiring rewrites each targeted task to ``completed``
+    with an audit block (``metadata.ct6_retired = {at, reason}``), so the
+    store stays REGISTERED (the unregistered-run arm's condition) and the
+    decision stays visible.
+
+    The closed boundary that keeps this surface honest: without ``--force`` it
+    refuses LIVE open tasks — only work already aged past the abandonment
+    window (:func:`task_stale_hours`) can be retired. Stale tasks do not block
+    the lock, so the no-force verb can never release anything the lock is
+    actually holding; ``--force`` is the human's explicit override for a list
+    they know is dead before it has aged. (An agent reaching this through Bash
+    is the same NAMED residual every filesystem gate carries — and it gains
+    nothing a bare ``TaskUpdate(status="completed")`` did not already allow.)
+    """
+    if not (reason or "").strip():
+        print("retire needs --reason naming why the work is being closed "
+              "without being done; the reason is recorded on every task.",
+              file=sys.stderr)
+        return 2
+    sid = (session or "").strip()
+    sid = sid[len("session-"):] if sid.startswith("session-") else sid
+    if not sid:
+        print("retire needs --session <session-id> (or the session-<first8> "
+              "dir name) naming which task list holds the dead work.",
+              file=sys.stderr)
+        return 2
+    read = read_harness_tasks(sid, tasks_root_arg)
+    store = Path(str(read.get("dir")))
+    if not store.is_dir():
+        print(f"no harness task store at {store} — nothing to retire. "
+              f"(root: {tasks_root(tasks_root_arg)})", file=sys.stderr)
+        return 1
+    problems = list(read.get("unreadable") or [])
+    for entry in problems:
+        print(f"unreadable, skipped: {entry.get('path')} "
+              f"({entry.get('reason')})", file=sys.stderr)
+
+    open_items = open_task_items(read["items"])
+    requested = [str(t).strip() for t in (task_ids or []) if str(t).strip()]
+    if requested:
+        by_id = {str(i.get("id")): i for i in open_items}
+        missing = [t for t in requested if t not in by_id]
+        for t in missing:
+            print(f"no OPEN task with id {t!r} in {store}", file=sys.stderr)
+        selected = [by_id[t] for t in requested if t in by_id]
+    else:
+        missing = []
+        selected = list(open_items)
+
+    live, stale = partition_stale_tasks(selected)
+    targets = selected if force else stale
+    refused = [] if force else live
+    for item in refused:
+        print(f"REFUSED (live): task [{item.get('id')}] was touched within "
+              f"the {task_stale_hours():g}h abandonment window, so it is not "
+              "evidently abandoned. Retire closes DEAD work; pass --force "
+              "only with the human's explicit decision that this list is "
+              "dead.", file=sys.stderr)
+
+    retired: list[str] = []
+    failed: list[str] = []
+    for item in targets:
+        path = Path(str(item.get("_path")))
+        data = {k: v for k, v in item.items() if k not in ("_path", "_mtime")}
+        data["status"] = "completed"
+        meta = data.get("metadata")
+        meta = dict(meta) if isinstance(meta, dict) else {}
+        meta["ct6_retired"] = {"at": _utc_now_iso(), "reason": reason.strip()}
+        data["metadata"] = meta
+        if _rc._atomic_write_json(path, data):
+            retired.append(str(item.get("id")))
+        else:
+            failed.append(str(item.get("id")))
+            print(f"could not rewrite {path}", file=sys.stderr)
+
+    print(json.dumps({
+        "store": str(store),
+        "retired": retired,
+        "refused_live": [str(i.get("id")) for i in refused],
+        "not_open": missing,
+        "write_failed": failed,
+        "unreadable": [e.get("path") for e in problems],
+    }, indent=2, sort_keys=True))
+    if refused or missing or failed or problems:
+        return 1
+    if not targets:
+        print("nothing to retire: the store holds no matching open task.",
+              file=sys.stderr)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
-    """Operator CLI — inspect and release the completion lock's ask-ledger."""
+    """Operator CLI — the ask-ledger, and the dead-task retire surface."""
     import argparse
 
     parser = argparse.ArgumentParser(
         prog="open_work.py",
-        description="Inspect and release the completion lock's ask-ledger.",
+        description="Operator surface for the completion lock: inspect and "
+                    "release the ask-ledger; retire an abandoned task list.",
     )
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -1435,9 +1642,34 @@ def main(argv: list[str] | None = None) -> int:
                            help="what closed it; a blank value resolves nothing")
     p_resolve.add_argument("--root", default=".", help="workspace root (default: .)")
 
+    p_retire = sub.add_parser(
+        "retire",
+        help="close an ABANDONED harness task list (operator action; refuses "
+             "live tasks unless --force)",
+    )
+    p_retire.add_argument("--session", required=True,
+                          help="session id, its first 8 chars, or the "
+                               "session-<first8> dir name")
+    p_retire.add_argument("--reason", required=True,
+                          help="why the work is being closed without being "
+                               "done; recorded on every retired task")
+    p_retire.add_argument("--task", action="append", default=[],
+                          help="retire only this task id (repeatable); "
+                               "default: every stale open task in the store")
+    p_retire.add_argument("--force", action="store_true",
+                          help="also retire LIVE open tasks - the human's "
+                               "explicit override for a list known dead "
+                               "before it has aged")
+    p_retire.add_argument("--tasks-root", default=None,
+                          help="harness task store root (default: "
+                               "~/.claude/tasks, or CT6_TASKS_ROOT)")
+
     args = parser.parse_args(argv)
     if args.command == "list":
         return _cmd_list(args.root)
+    if args.command == "retire":
+        return _cmd_retire(args.session, args.reason, args.task,
+                           args.tasks_root, args.force)
     return _cmd_resolve(args.root, args.entry_id, args.evidence)
 
 

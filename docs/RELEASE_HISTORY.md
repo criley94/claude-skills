@@ -10,6 +10,7 @@ The formal per-version log is [`CHANGELOG.md`](../CHANGELOG.md); this file is th
 
 Every release, newest first — the one-line index the README used to carry. Full detail for each is in the per-release sections below and in [`CHANGELOG.md`](../CHANGELOG.md).
 
+- `v3.64.0` — inherited-task-debt
 - `v3.63.0` — bauplan-skills-dependency
 - `v3.62.0` — review-evidence-binding
 - `v3.61.2` — agent-directive-block-menu
@@ -166,6 +167,22 @@ Every release, newest first — the one-line index the README used to carry. Ful
 █▓▒░  ◆  NEW IN v3.63.0  ◆  ░▒▓█
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ```
+
+### v3.64.0 — inherited-task-debt: the completion lock learns abandonment
+
+A production workspace reported the lock blocking every turn with no working override. The diagnosis found a five-part trap: harness task lists **outlive sessions** (resume/continue/compact keep the store, teams keep the team store, forks carry it), so four tasks from terminated sessions followed the lineage forever; the block's one printed command governed a *different* gate and refused anyway on the dead runs' debris; the kill-switches only work in the launch environment, stated nowhere; and every lock block heartbeat the dead run's marker, so it could never age out.
+
+**Abandonment discrimination.** An open task untouched longer than the abandonment window (`CT6_TASK_STALE_HOURS`, floored at 1h, defaulting to the marker window) is **inherited debt** — listed in the block with the store dir named, never blocking. Any `TaskUpdate` rewrites the file and revives it.
+
+**An operator retire verb.** `open_work.py retire --session <sid> --reason "…"` closes a dead list with an audit trail and refuses live tasks without `--force` — it structurally cannot release a turn the lock is holding, which is what makes it safe to document.
+
+**Messages that tell the truth.** The block states the launch-env fact and names both staleness windows; `REFUSED --mark-complete` names `--stand-down` as the abandonment verb.
+
+**The heartbeat is the run's pulse.** Only engaged sessions touch the marker on a block, so abandoned runs actually cross the staleness window now.
+
+**The darwin red goes green.** The measurement-immutability arm's backslash-spelling pin — red on macOS since it shipped, honestly recorded in the v3.63.0 artifact — is closed; the suite measures 0 failed again.
+
+Full detail in [`CHANGELOG.md`](../CHANGELOG.md).
 
 ### v3.63.0 — bauplan-skills-dependency: a dependency that costs nothing where it does not apply
 

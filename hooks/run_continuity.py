@@ -880,7 +880,20 @@ def main(argv: list[str]) -> int:
                     "audit (--check) reports open worklist debt in this "
                     "workspace. Close the worklist first (the run is not "
                     "complete), or pass --force ONLY with the user's explicit "
-                    "direction (the override is logged).",
+                    "direction (the override is logged).\n"
+                    # v3.64.0 (D4) — the abandonment fork. A field report hit
+                    # this refusal while trying to clear a DEAD run: the debt
+                    # belonged to abandoned work that was never going to close,
+                    # and the refusal named no next move, so 'complete' looked
+                    # like the only verb and it did not work. Completing and
+                    # abandoning are different decisions with different
+                    # commands, and the refusal is where the difference bites.
+                    "If the run is being ABANDONED rather than completed, "
+                    "that is a different verb: --stand-down \"<why>\" records "
+                    "the decision as an auditable artifact "
+                    "(pipeline-stand-down.md) and is deliberately not gated "
+                    "by this audit - dead work is exactly what it exists to "
+                    "record.",
                     file=sys.stderr,
                 )
                 return 1

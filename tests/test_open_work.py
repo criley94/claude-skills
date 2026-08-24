@@ -1167,7 +1167,11 @@ def test_teammate_name_ignores_assistant_authored_text(tmp_path: Path) -> None:
 def _blank_result_fields(result: dict) -> None:
     # `advisory_asks` joined the contract in v3.56.0 when the ledger became
     # advisory by default — recorded asks still have to surface somewhere.
-    assert set(result) == {"blocked", "open_tasks", "open_asks", "advisory_asks",
+    # `stale_tasks` + `tasks_dir` joined in v3.64.0 with the abandonment
+    # discrimination: inherited debt has to surface somewhere too, and the
+    # store dir is named for the operator hunting the right session-* dir.
+    assert set(result) == {"blocked", "open_tasks", "stale_tasks", "tasks_dir",
+                           "open_asks", "advisory_asks",
                            "advisory_notes", "unreadable", "turn_output",
                            "reasons", "killswitch"}
 
