@@ -20,29 +20,29 @@
   "provisional": false,
   "release_label": true,
   "repo_root": "/Users/paulingram/Documents/code/claude-skills",
-  "result_tail": "7829 passed, 16 skipped in 106.35s (0:01:46)",
+  "result_tail": "7829 passed, 16 skipped in 100.80s (0:01:40)",
   "schema": "suite-measurement/v1",
   "suite_green": true,
-  "timestamp": "2026-08-24T04:41:56Z",
+  "timestamp": "2026-08-24T05:15:39Z",
   "tree_dirty": false,
   "tree_state": {
-    "after": "e752ed5415f35c21",
-    "before": "e752ed5415f35c21",
+    "after": "07da9ff31c55b787",
+    "before": "07da9ff31c55b787",
     "components_after": {
       "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "head": "14df20bbf53255f7ea2d0adb16cfef251dcc3ae0",
+      "head": "91ad15dad45347aa510a4b7673f14271344c582c",
       "untracked_count": 0,
       "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "components_before": {
       "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "head": "14df20bbf53255f7ea2d0adb16cfef251dcc3ae0",
+      "head": "91ad15dad45347aa510a4b7673f14271344c582c",
       "untracked_count": 0,
       "untracked_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
-    "head": "14df20bbf53255f7ea2d0adb16cfef251dcc3ae0",
+    "head": "91ad15dad45347aa510a4b7673f14271344c582c",
     "source": "git",
-    "source_digest": "cd0567ba7d35eb48"
+    "source_digest": "6f0384dd4044d2ac"
   },
   "verdict": "measured-clean",
   "violations": []
