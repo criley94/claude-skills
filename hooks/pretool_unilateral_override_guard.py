@@ -190,11 +190,26 @@ def _targets_measurement_artifact(file_path: str) -> bool:
         p = Path(file_path)
     except (TypeError, ValueError):
         return False
+    # v3.64.0 (D0) — the backslash spelling, normalized the way every other
+    # matcher in this guard already does it (`.replace("\\", "/")`). On
+    # Windows, `Path` splits both separators and this is a no-op; on POSIX a
+    # backslash is an ordinary character, so `C:\docs\measurements\x.json`
+    # parsed as ONE component, the docs/measurements parent-pair never
+    # matched, and the arm waved the write through. The cross-platform pin
+    # (`test_backslash_spelling_is_still_refused`) was red on darwin from the
+    # day the arm shipped — recorded as pre-existing in the v3.63.0
+    # measurement — and this is the close.
+    norm: Path | None = None
+    if "\\" in file_path:
+        try:
+            norm = Path(file_path.replace("\\", "/"))
+        except (TypeError, ValueError):
+            norm = None
     try:
         resolved: Path | None = p.resolve()
     except Exception:
         resolved = None
-    for candidate in (resolved, p):
+    for candidate in (resolved, p, norm):
         if candidate is None:
             continue
         try:

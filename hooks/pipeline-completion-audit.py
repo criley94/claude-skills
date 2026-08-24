@@ -2298,6 +2298,36 @@ def _emit_completion_lock_block(verdict: dict, guard_text: str | None = None) ->
             "something else holds the turn:\n"
             + _lock_bullets(advisory, _lock_ask_text)
         )
+    # v3.64.0 (D1/D3) — inherited debt, listed the way the frontend-E2E gate
+    # lists pre-existing slices: named, counted, and explicitly NOT what holds
+    # this turn. The store dir is printed because the field report spent real
+    # operator time hunting the right `session-*` directory. Per the F-A rule
+    # (pinned: the block never contains the substrate path) the operator verb
+    # for clearing a dead list is pointed at, not printed.
+    stale = list(verdict.get("stale_tasks") or [])
+    if stale:
+        window = None
+        probe = getattr(_ow, "task_stale_hours", None)
+        if callable(probe):
+            try:
+                window = float(probe())
+            except Exception:
+                window = None
+        win_txt = f"{window:g}h" if window else "the abandonment window"
+        tasks_dir = str(verdict.get("tasks_dir") or "").strip()
+        sections.append(
+            f"FYI - inherited stale open tasks ({len(stale)}). These are NOT "
+            f"blocking this stop: each has gone untouched longer than "
+            f"{win_txt}, the signature of work left behind by a terminated or "
+            "superseded session rather than work this turn is holding open. "
+            "Touching one through the harness's own TaskUpdate tool makes it "
+            "live again, and a live open task holds the turn as usual. "
+            "Clearing a dead list without doing the work is an OPERATOR "
+            "action; the human's surface for it is documented in the README, "
+            "deliberately not here:\n"
+            + _lock_bullets(stale, _lock_task_text)
+            + (f"\n  (task store: {_lock_clip(tasks_dir)})" if tasks_dir else "")
+        )
     if rule_fired:
         reason = str((turn_output or {}).get("reason") or "narrative shape")
         sections.append(
@@ -2365,6 +2395,16 @@ def _emit_completion_lock_block(verdict: dict, guard_text: str | None = None) ->
         "arm only\n"
         "     Each switch disables ONLY its own source; the others keep "
         "enforcing.\n"
+        # v3.64.0 (D3) — the launch-env fact. A field report read the switch
+        # list, exported one INSIDE the session, and concluded there was no
+        # way to override: hooks inherit the APP's environment, so an export
+        # typed into the session reaches neither this hook nor the lock. A
+        # lever the operator cannot find the socket for is the same as no
+        # lever.
+        "     Kill-switches are read from the environment Claude Code was "
+        "LAUNCHED from (or a settings-file env block). An export typed inside "
+        "this session reaches neither this hook nor the lock - set the "
+        "variable before starting the app, or in settings env.\n"
         # S-3 (adversarial): a SIXTH lever existed and this list did not name
         # it. CT6_RUN_MARKER_STALE_HOURS does not read like a kill-switch, but
         # driving it near zero ages every marker instantly, which stands the
@@ -2375,9 +2415,18 @@ def _emit_completion_lock_block(verdict: dict, guard_text: str | None = None) ->
         # lever is worse than a documented one, because the operator whose gate
         # is misfiring cannot find it and reaches for something blunter.
         f"       {MARKER_STALE_HOURS_ENV}=<hours>  - not a switch by name, but "
-        "shortening this window ages the run marker and stands the "
-        "unregistered-run arm down; floored at "
-        f"{MIN_MARKER_STALE_HOURS}h so it cannot be collapsed to nothing\n\n"
+        "shortening this window ages the run marker, stands the "
+        "unregistered-run arm down, and (unless the task window below "
+        "overrides it) is also how fast open tasks age into non-blocking "
+        "inherited debt; floored at "
+        f"{MIN_MARKER_STALE_HOURS}h so it cannot be collapsed to nothing\n"
+        # v3.64.0 (D1) — the task-abandonment window is its own lever, named
+        # here for the same S-3 reason the marker window is: an undocumented
+        # lever is worse than a documented one.
+        f"       {getattr(_ow, 'TASK_STALE_HOURS_ENV', 'CT6_TASK_STALE_HOURS')}"
+        "=<hours>  - the task-abandonment window alone, when it should differ "
+        "from the marker's; open tasks untouched longer than it are surfaced "
+        "as inherited debt instead of blocking; floored the same way\n\n"
         "Note: nothing an agent can write releases this lock - not the "
         "no-progress budget, not "
         f".architect-team/{ESCALATION_MARKER}, not "
@@ -2987,7 +3036,18 @@ def _completion_lock_action(
         # marker is discarded, and the continuation guard silently degrades.
         # `MARKER_FILENAME` is fingerprint-excluded, so this never reads as
         # progress.
-        if _rc is not None and marker is not None:
+        #
+        # v3.64.0 (D5) — ENGAGED sessions only. The heartbeat is the run's
+        # pulse, not the workspace's: unconditioned, ANY session wedged on its
+        # own tasks kept refreshing a dead run's marker, so an abandoned run
+        # could never cross `marker_is_stale` while anyone worked in the repo —
+        # the staleness window review remediation #3 added was unreachable in
+        # exactly the abandoned-workspace case it was added for (measured in a
+        # field report: block #7 on a marker whose run died days earlier).
+        # `engaged` is the same shared basis the guard uses (orchestrator
+        # session, or a transcript that invoked a pipeline skill), so a live
+        # run's own stops keep it fresh and nothing else does.
+        if _rc is not None and marker is not None and engaged:
             _rc.touch_marker(root)
         guard_text = _completion_lock_guard_text(
             root, marker, engaged, records, head_records, truncated,

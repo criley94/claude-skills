@@ -15,7 +15,7 @@
           ██    ██      ██   ██ ██  ██  ██           ██ ██  ██ ██
           ██    ███████ ██   ██ ██      ██      ███████ ██ ██   ██
 
-                        ─── C T 6 ───   v 3 . 63 . 0
+                        ─── C T 6 ───   v 3 . 64 . 0
 ```
 
 > **CLAUDE TEAM SIX (CT6)** — spec-to-production multi-agent coding pipeline
@@ -36,9 +36,9 @@
 > `/architect-team`, `/architect-team:bug-fix`, `/architect-team:mini`,
 > `/architect-team:inject`). CLAUDE TEAM SIX is the user-facing name.
 
-![version](https://img.shields.io/badge/version-3.63.0-2563EB?style=flat-square)
+![version](https://img.shields.io/badge/version-3.64.0-2563EB?style=flat-square)
 ![license](https://img.shields.io/badge/license-MIT-3FB950?style=flat-square)
-![tests](https://img.shields.io/badge/tests-7807%20passing-3FB950?style=flat-square)
+![tests](https://img.shields.io/badge/tests-7829%20passing-3FB950?style=flat-square)
 ![claude code](https://img.shields.io/badge/Claude%20Code-plugin-7C3AED?style=flat-square)
 
 ```
@@ -77,21 +77,19 @@ the current release's spotlight, below.
 
 ```
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-█▓▒░  ◆  NEW IN v3.63.0  ◆  ░▒▓█
+█▓▒░  ◆  NEW IN v3.64.0  ◆  ░▒▓█
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ```
 
-### v3.63.0 — bauplan-skills-dependency: a dependency that costs nothing where it does not apply
+### v3.64.0 — inherited-task-debt: the completion lock learns abandonment
 
-CT6 had exactly one way to depend on a plugin — a hard block that exits setup 1 when a member is missing. Correct for superpowers, cartographer, and ralph-loop. Wrong for a data-lakehouse plugin most users will never touch.
+A production workspace reported the completion lock blocking **every turn with no working override**: four open tasks from *terminated* sessions followed the session lineage forever (task lists outlive sessions — resume/continue/compact keep the store, teams keep the team store, forks carry it), the one command the block printed governed a different gate and refused anyway, the kill-switches only work in the launch environment (stated nowhere), and every block heartbeat the dead run's marker so it could never age out.
 
-**A conditional tier** now sits beside the hard set, provably disjoint from it and routed nowhere near the exit-code branch: a missing conditional member is reported and remediated but can never fail an install.
+**Inherited debt, not a wedge.** An open task untouched longer than the abandonment window (`CT6_TASK_STALE_HOURS`, floored at 1h, defaulting to the marker window) is listed in the block — store dir named — and blocks nothing. Any `TaskUpdate` revives it into ordinary blocking work.
 
-**Arming is asymmetric by how certain the signal is.** A `bauplan_project.yml` anywhere in the repo arms silently — recursive, so a monorepo subdirectory counts; skip-list aware, so a vendored or reference-cloned copy never arms its host. Stated intent with no marker asks exactly once, then arms. That second path is not politeness: the pipeline-creation skill exists to build projects from scratch, where no marker can yet exist.
+**An operator verb that cannot overreach.** `open_work.py retire` closes a dead list with an audit trail and *refuses live tasks without `--force`* — it structurally cannot release a turn the lock is actually holding, which is exactly what makes it safe to document.
 
-**It injects into the lanes, not the agents.** The agent boilerplate compiles into all 39 agents unconditionally — a block there would ship lakehouse instructions to `visual-analyzer` and `closeout-agent` forever. Each skill landed where it is genuinely the right tool instead, and every pointer is gated on the arming verdict: an unarmed run reads no Bauplan instruction at all.
-
-**A shipped leak closed on the way.** A byte-preservation test written for the new gate exposed a defect present in every prior release: guidance-block removal never reclaimed the newline its insertion wrote, so each install/uninstall cycle left one byte behind and accumulated without bound in a file CT6 does not own.
+**Messages that tell the truth.** The block now states the launch-env fact; `REFUSED --mark-complete` names `--stand-down` as the abandonment verb; the heartbeat is scoped to engaged sessions so dead runs actually go stale; and the darwin-red backslash pin recorded in the v3.63.0 measurement is closed — the suite measures **0 failed** again.
 
 Full detail in [`CHANGELOG.md`](CHANGELOG.md) and [`docs/RELEASE_HISTORY.md`](docs/RELEASE_HISTORY.md).
 
@@ -566,7 +564,7 @@ None of the three is a thing the agent asserts:
 
 | Source | Read from | Kill-switch |
 |---|---|---|
-| **Harness task list** | `~/.claude/tasks/session-<first-8-of-session-id>/<taskId>.json`, written by the harness. A task whose `status` is not `completed` — including a missing or unrecognized status — counts as OPEN. Teammates are held only for tasks whose `owner` matches them, never wedged on lanes they cannot close. | `CT6_TASK_LIST_GATE_DISABLED` |
+| **Harness task list** | `~/.claude/tasks/session-<first-8-of-session-id>/<taskId>.json`, written by the harness. A task whose `status` is not `completed` — including a missing or unrecognized status — counts as OPEN. Teammates are held only for tasks whose `owner` matches them, never wedged on lanes they cannot close. Since v3.64.0 an open task whose *file* has gone untouched longer than the abandonment window (`CT6_TASK_STALE_HOURS`, floored at 1h; defaults to the `CT6_RUN_MARKER_STALE_HOURS` window, 72h) is **inherited debt** — task lists outlive sessions (resume/continue/compact keep the store; forks carry it), so dead sessions' leftovers are listed in the block as non-blocking instead of wedging every later session. Any `TaskUpdate` rewrites the file and revives the task. | `CT6_TASK_LIST_GATE_DISABLED` |
 | **Ask-ledger** | `.architect-team/ask-ledger.json`, DERIVED from the harness-written transcript rather than registered by the model — so an agent cannot decline to register an ask it would rather not do. Entries accumulate and re-derivation only ever ADDS; ambiguous stays open. | `CT6_ASK_LEDGER_GATE_DISABLED` |
 | **Turn-output rule** | All assistant text in the turn — every block since the last genuine user prompt, so a summary followed by a one-line sign-off cannot hide it. While work is open the turn output is *one line of state, not a narrative*: the rule trips on a structural marker (heading, bullet — ASCII or Unicode, numbered item, bold-label block, table row) at `>= 2` lines, on the absolute line ceiling, or on enough unbroken prose. A one-line turn NEVER trips, and markerless prose below the ceiling is deliberately allowed so ordinary narration between tool calls is not refused. | `CT6_TURN_OUTPUT_GATE_DISABLED` |
 
@@ -586,6 +584,18 @@ can**, with any of these:
 | `CT6_TASK_LIST_GATE_DISABLED=1` | Only the harness-task-list source. The turn-output rule keeps enforcing. |
 | `CT6_ASK_LEDGER_GATE_DISABLED=1` | Stops the ask-ledger recording at all. It is already advisory (below), so this is only for silencing the FYI listing. |
 | `CT6_TURN_OUTPUT_GATE_DISABLED=1` | Only the one-line-of-state turn-output rule. The task-list source keeps enforcing. |
+
+**Where to set them (v3.64.0, from a field report):** kill-switches are read
+from the environment Claude Code was **launched** from, or a settings-file
+`env` block — an `export` typed *inside* a session reaches neither the hook nor
+the lock, which reads as "the override doesn't work". Set the variable before
+starting the app (`CT6_TASK_LIST_GATE_DISABLED=1 claude`) or persist it per
+project in `.claude/settings.json`: `{ "env": { "CT6_TASK_LIST_GATE_DISABLED": "1" } }`.
+
+Two windows tune the lock without switching anything off:
+`CT6_RUN_MARKER_STALE_HOURS` (the run-marker staleness window, default 72h) and
+`CT6_TASK_STALE_HOURS` (the task-abandonment window; defaults to the marker
+window). Both floor at 1h so neither can be collapsed into a silent kill-switch.
 
 ### ▌ Which sources can actually refuse a stop
 
@@ -668,6 +678,31 @@ python hooks/open_work.py resolve <id> --evidence "..." # close one, naming what
 This is **intended** as the operator's surface: the block message deliberately
 does not name it, so a gated session is not handed its own exit, and an entry
 with no evidence stays open.
+
+### ▌ Retiring a dead task list (v3.64.0)
+
+Task lists outlive sessions, so a terminated run's open tasks follow the
+session lineage into every later resume — the field-reported shape is a
+workspace wedged on tasks whose owning teammates died days earlier. Aged past
+the abandonment window they stop blocking on their own (they are listed as
+*inherited stale* instead), and this is the operator verb that closes them out
+with an audit trail rather than leaving them in the store forever:
+
+```bash
+python hooks/open_work.py retire --session <session-id-or-session-dir> --reason "runs terminated"
+python hooks/open_work.py retire --session <sid> --task 9 --reason "..."   # one task only
+python hooks/open_work.py retire --session <sid> --reason "..." --force    # live tasks too — your call, not the agent's
+```
+
+Each retired task is rewritten `status: completed` with
+`metadata.ct6_retired = {at, reason}`, so the store stays *registered* (the
+unregistered-run arm's condition) and the decision stays visible. The closed
+boundary that makes this safe to document: **without `--force` it refuses any
+LIVE open task** — only work already aged past the window can be retired, and
+stale work was not blocking anything, so the no-force verb can never release a
+turn the lock is actually holding. The same honest-boundary note as above
+applies: it is an ordinary script, and `--force` is *your* override, not the
+agent's.
 
 **It is not, however, closed to the agent, and you should read it that way.** The
 CLI is an ordinary script — anything that can run `Bash` can run it, and the
