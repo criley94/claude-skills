@@ -1,0 +1,55 @@
+{
+  "schema_version": "playwright-suite-manifest/v1",
+  "e2e_dir": "e2e",
+  "personas": [
+    "shopper"
+  ],
+  "prod_exceptions": [],
+  "tests": [
+    {
+      "file": "e2e/personas/shopper/checkout.spec.ts",
+      "test_names": [
+        "shopper completes a card checkout"
+      ],
+      "kind": "journey",
+      "source": "user-flow",
+      "covers_elements": [],
+      "covers_routes": [
+        "/cart"
+      ],
+      "safety": "dev",
+      "mutates_data": true,
+      "origin_ref": null
+    },
+    {
+      "file": "e2e/personas/shopper/browse-catalog.spec.ts",
+      "test_names": [
+        "shopper filters the catalog by category"
+      ],
+      "persona": "shopper",
+      "kind": "smoke-ish",
+      "source": "handwritten",
+      "covers_elements": [],
+      "covers_routes": [],
+      "safety": "staging",
+      "mutates_data": "no",
+      "origin_ref": null
+    },
+    {
+      "file": "e2e/prod-checks/home-smoke.spec.ts",
+      "test_names": [
+        "the storefront home page renders for an anonymous visitor"
+      ],
+      "persona": "night-ops",
+      "kind": "prod-check",
+      "source": "gap-fill",
+      "covers_elements": [],
+      "covers_routes": [
+        "/"
+      ],
+      "safety": "prod",
+      "mutates_data": false,
+      "origin_ref": null
+    }
+  ]
+}

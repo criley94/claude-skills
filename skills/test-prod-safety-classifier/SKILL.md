@@ -93,6 +93,10 @@ Runs on every test file written or modified during a pipeline run. Gates the sli
 
 The auto-classifier is invoked from the Phase 3 review-gate hook. A slice cannot mark complete with an unclassified test.
 
+## Suite-manifest binding
+
+The `playwright-suite-builder` skill's P8 stage records THIS skill's verdict per test into the target codebase's `<e2e-dir>/suite-manifest.json` — `safety` (`dev` | `prod`) and `mutates_data` (bool) on every entry. The manifest STORES the verdict; it never derives one of its own, so the classifier stays the single source of the judgment. Entry into the manifest's prod project therefore REQUIRES this skill's verdict: a test with no recorded classification lands `safety: dev` and is excluded from the prod project, and a `mutates_data: true` test enters it only through an authorized `prod_exceptions[]` entry (the user's recorded authorization, the `it-<prefix>` test-only data tag from `dev-api-integration-testing`, and mandatory teardown). Absent a suite manifest, this skill behaves exactly as it does today.
+
 ## Cross-references
 
 - `skills/common-pipeline-conventions/SKILL.md` `## Prod-safe test classification discipline (v2.17.0)` — the canonical home of the rule + the 4 severities + the SR origin kind + the annotation contract.

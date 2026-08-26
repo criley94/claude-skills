@@ -74,6 +74,8 @@ Phase 5 exists to verify the layers actually integrate. For every `both`-layer f
 
 If `ROUTE_MAP.md` is stale (per the `intake-and-mapping` freshness check), request re-mapping BEFORE authoring tests. Tests built on stale assumptions are worse than no tests.
 
+When the frontend codebase carries `<e2e-dir>/suite-manifest.json`, ENUMERATE that manifest and run the ENTIRE dev suite — every registered entry, not only the flows this task group authored — routing failures as solution requirements exactly as today; absent a suite manifest, behavior is unchanged.
+
 ## Backend integration workflow
 
 1. Read `design.md` `## Dev Environment` for connection details.

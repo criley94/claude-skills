@@ -134,12 +134,16 @@ except ImportError:  # pragma: no cover - bare-module shape
 # `data-eng-pipeline` (v3.50.0) was wired into the Stop-time skill-invocation
 # auditor but omitted here until v3.55.2 — the data-eng lane is a pipeline driver
 # and must be real-time gated exactly like the other five.
+# `playwright-suite-builder` joins them as the suite-building lane behind
+# /architect-team:playwright-suite — a command-reachable run-driving pipeline
+# skill, so the same role and the same gate as data-eng.
 _PIPELINE_SKILLS: frozenset[str] = frozenset({
     "architect-team-pipeline",
     "bug-fix-pipeline",
     "ux-test-builder",
     "mini-architect-team-pipeline",
     "data-eng-pipeline",
+    "playwright-suite-builder",
     "proposal-refiner",
 })
 

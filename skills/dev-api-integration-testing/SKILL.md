@@ -27,6 +27,10 @@ Tests read these from the design artifact — never hard-code in test files.
   - Non-deterministic inputs (time, randomness, cloud-region routing) when assertion would otherwise flake.
 - Everything else is real.
 
+## Full-run enumeration — the whole dev suite
+
+When this discipline runs as a FULL integration pass — the `architect-team-pipeline` Phase 5 cross-layer run, the `mini-review-sweep` batch — and the target codebase carries `<e2e-dir>/suite-manifest.json`, ENUMERATE that manifest and run the ENTIRE dev project: every registered entry, not only the tests belonging to the slice under test. The manifest is the registry of which tests exist (`playwright-suite-builder` owns its contract), and a full run that re-runs only the current slice's tests is a slice run wearing a full run's name — it cannot see the regression the slice caused elsewhere, which is the failure a full run exists to catch. Failures route as solution requirements exactly as today. Absent a suite manifest, behavior is unchanged — run the slice's integration tests as this skill otherwise describes.
+
 ## Test structure
 
 ### Setup phase

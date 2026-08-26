@@ -400,10 +400,16 @@ ENFORCE_ZERO_COMPLIANCE_FINDINGS = True
 
 def test_engine_runs_over_the_real_in_scope_set() -> None:
     result = ic.assess_instruction_files(REPO_ROOT)
-    # 53 SKILL.md + 39 agents + 25 commands + CLAUDE.md + 2 maps = 120. The Run D
-    # data-annotations slice is +1 over the 119 baseline: the new data-annotations
-    # skill (the engine itself is scripts/-tier, out of scope).
-    assert result["files_checked"] == 120, result["files_checked"]
+    # 55 SKILL.md + 39 agents + 26 commands + CLAUDE.md + 2 maps = 123. Ledger —
+    # APPEND transitions, never rewrite (the v3.59.3 lesson):
+    #   119 -> 120  Run D data-annotations: the new data-annotations skill (its
+    #               engine is scripts/-tier, out of scope).
+    #   120 -> 123  playwright-suite-intuition-lifecycle: +2 skills
+    #               (intuition-map-lifecycle, playwright-suite-builder) and
+    #               +1 command (playwright-suite). Both engine packages
+    #               (scripts/intuition_lifecycle/, scripts/playwright_suite/)
+    #               are scripts/-tier and so add nothing here.
+    assert result["files_checked"] == 123, result["files_checked"]
     assert isinstance(result["findings"], list)
 
 

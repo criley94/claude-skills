@@ -65,16 +65,17 @@ def _discover_canonical_commands() -> tuple[str, ...]:
         names = []
     if names:
         return tuple(names)
-    # Frozen fallback — the 25 commands shipped as of v3.50.0 (+closeout v3.18.0,
+    # Frozen fallback — the 26 commands shipped (+closeout v3.18.0,
     # +logit v3.21.0, +librarian-install v3.29.0, +knowledge-install v3.49.0,
-    # +data-eng v3.50.0).
+    # +data-eng v3.50.0, +playwright-suite).
     return (
         "absorb-phenotype", "architect-team", "architect-team-setup", "bug-fix",
         "classify-test-prod-safety", "cleanup-worktrees", "closeout", "data-eng",
         "discipline-status", "editability-audit", "inject", "knowledge-install",
         "librarian-install", "logit", "memory", "mempalace-install", "mini",
-        "mini-review-sweep", "monitor-tests", "optimize-structure", "refine-prompt",
-        "status", "ux-test", "visual-qa", "visual-to-api",
+        "mini-review-sweep", "monitor-tests", "optimize-structure",
+        "playwright-suite", "refine-prompt", "status", "ux-test", "visual-qa",
+        "visual-to-api",
     )
 
 
@@ -110,6 +111,12 @@ _PIPELINE_COMMAND_SKILLS: dict[str, tuple[str, ...]] = {
     # on disk when the frozen fallback is in force, so the mapping is declared here
     # explicitly rather than relying on directory derivation alone.
     "data-eng": ("data-eng", "data-eng-pipeline"),
+    # The suite-building lane command routes to the playwright-suite-builder
+    # skill (mirrors data-eng -> data-eng-pipeline). Declared here explicitly
+    # for the same reason: without it the command resolves to itself, which is
+    # not in pretool_skill_gate._PIPELINE_SKILLS, so the real-time gate never
+    # fires no matter what that registry says.
+    "playwright-suite": ("playwright-suite", "playwright-suite-builder"),
 }
 
 

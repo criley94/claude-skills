@@ -94,6 +94,42 @@ For each element, in order:
 - `confirmed_endpoint` — endpoint object or `null`. Filled by auto-confirmation (from `candidate_endpoints[0]`) OR by the drill-down user answer.
 - `superseded_by` — `null`, or a REQ-id when the user explicitly overrides this entry post-Phase 0.
 
+## Provenance fields (additive)
+
+Two further per-element fields record WHERE an entry came from. They are an
+additive extension to the schema above — nothing in the rubric, the gate, or the
+intuiter's own behaviour changes because of them.
+
+- `source` — one of `intuiter`, `user-flow`, `bug-path`. `intuiter` is this
+  skill's own output. `user-flow` is an element a user-specified Playwright flow
+  exercised. `bug-path` is an element on a path that a resolved bug travelled.
+- `regression_refs[]` — list of `{test, ref}` objects, where `test` names a test
+  that covers this element and `ref` names the SR path or bug slug that produced
+  it (an optional `note` may carry one line of context). Empty for elements no
+  regression test covers. These key names are the ones
+  `scripts/intuition_lifecycle/` validates — any other spelling is rejected as
+  `malformed-regression-ref`.
+
+**Backward compatibility — absent means intuiter, and no migration is required.**
+An entry that carries neither field reads as `source` `intuiter` with an empty
+`regression_refs` list, which is exactly what a map produced before these fields
+existed always implied. Every pre-existing map parses unchanged, and no map
+anywhere needs a migration pass; the parser treats absence as the default rather
+than rewriting entries. Absence is a permanent, supported state.
+
+**The sole writer of non-`intuiter` entries is `skills/intuition-map-lifecycle`.**
+The `interaction-intuiter` agent writes `intuiter` entries and only those; the
+sister skill's `grow` and `bug-path-upsert` verbs are the only things that write
+`user-flow` and `bug-path` entries, and its deterministic engine is the only
+thing that rewrites this artifact outside an intuiter run.
+
+**One asymmetry is deliberate, and named here so it is not read as a bug.** The
+Phase −1D bulk-verify below resolves the INTUITER's uncertainty, so it fires for
+every `low` / `unknown` intuiter entry. A `grow` upsert takes no such round-trip
+— the user specifying the flow IS the confirmation, and there is no guess left to
+adjudicate. `grow` still asks exactly one question when its entry would
+contradict an existing confirmed entry, and it never silently overwrites one.
+
 ## Escalate-don't-guess
 
 When the maps + label + design source cannot responsibly resolve an element, the intuiter assigns `confidence: unknown` and authors a precise `ambiguity_question`. It does NOT invent an endpoint or an action. The Phase −1D bulk-verify gate exists exactly for these — surfacing them is the correct outcome.

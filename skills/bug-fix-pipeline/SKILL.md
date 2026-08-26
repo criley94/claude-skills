@@ -281,6 +281,8 @@ Both artifacts must currently fail (they are reproducing the bug). Phase B6 will
 
 Persist the artifacts under `<target-codebase>/tests/bug-fix-<bug-slug>/` (or the codebase's convention) and stage them; they become part of the same commit the fix lands in at Phase B7.
 
+**Upsert the bug path into the intuition map.** The artifact just PROVED which elements and endpoints the failing path actually traverses — evidence no intuiter produces, because it comes from running the bug rather than reading the code. Call the `intuition-map-lifecycle` skill's `bug-path-upsert` verb with the artifact's path elements: each entry carries `source: bug-path` and names the artifact in `regression_refs[]`, so the next author of a flow over this path inherits the bug's evidence instead of re-deriving it.
+
 ## Phase B3 — OpenSpec proposal authoring
 
 Author a slim OpenSpec change at `openspec/changes/<bug-slug>/`. Apply `superpowers:brainstorming` to settle the fix's design intent before drafting (per `## Plugin prerequisites (v3.9.0)`); when the root cause is unclear, the `diagnostic-research-team` dispatch carries `superpowers:systematic-debugging`. The artifact chain is the same as a feature change: `proposal.md`, `design.md`, `specs/<cap>/spec.md`, `tasks.md`, `coverage-map.json`. The proposal:
@@ -513,6 +515,7 @@ On `bug-resolved` at B6 (AND the v2.21.0 target-element gate passing):
    - The Phase B6 QA-replay evidence (the now-passing artifacts + the symptom-gone confirmation).
    - The total iteration count (typically 1 or 2; flag if ≥ 5).
    - Final statement: **"Bug `<bug-slug>` has been resolved."** Followed by the archive path.
+3. **Register the reproduction artifact in the suite manifest.** When the target codebase carries `<e2e-dir>/suite-manifest.json`, register the B2 artifact there per `playwright-suite-builder` as a `kind: debug-flow` entry whose `origin_ref` names this run's SR path or bug slug. The regression test the fix earned then belongs to the durable suite — enumerated by every full integration run — rather than being a file only this run remembers. Absent a suite manifest, behavior is unchanged.
 
 ## Phase B8 — Commit + push
 

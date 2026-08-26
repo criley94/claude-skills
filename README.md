@@ -15,7 +15,7 @@
           ██    ██      ██   ██ ██  ██  ██           ██ ██  ██ ██
           ██    ███████ ██   ██ ██      ██      ███████ ██ ██   ██
 
-                        ─── C T 6 ───   v 3 . 64 . 0
+                        ─── C T 6 ───   v 3 . 65 . 0
 ```
 
 > **CLAUDE TEAM SIX (CT6)** — spec-to-production multi-agent coding pipeline
@@ -32,13 +32,13 @@
 > end-to-end.
 
 > The Claude Code plugin slug is `architect-team` (preserved for backward
-> compatibility with existing installations + the 25 slash commands like
+> compatibility with existing installations + the 26 slash commands like
 > `/architect-team`, `/architect-team:bug-fix`, `/architect-team:mini`,
 > `/architect-team:inject`). CLAUDE TEAM SIX is the user-facing name.
 
-![version](https://img.shields.io/badge/version-3.64.0-2563EB?style=flat-square)
+![version](https://img.shields.io/badge/version-3.65.0-2563EB?style=flat-square)
 ![license](https://img.shields.io/badge/license-MIT-3FB950?style=flat-square)
-![tests](https://img.shields.io/badge/tests-7829%20passing-3FB950?style=flat-square)
+![tests](https://img.shields.io/badge/tests-8205%20passing-3FB950?style=flat-square)
 ![claude code](https://img.shields.io/badge/Claude%20Code-plugin-7C3AED?style=flat-square)
 
 ```
@@ -77,19 +77,19 @@ the current release's spotlight, below.
 
 ```
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-█▓▒░  ◆  NEW IN v3.64.0  ◆  ░▒▓█
+█▓▒░  ◆  NEW IN v3.65.0  ◆  ░▒▓█
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ```
 
-### v3.64.0 — inherited-task-debt: the completion lock learns abandonment
+### v3.65.0 — playwright-suite-intuition-lifecycle: a lifecycle for the intuition map, a durable registry for the Playwright suite
 
-A production workspace reported the completion lock blocking **every turn with no working override**: four open tasks from *terminated* sessions followed the session lineage forever (task lists outlive sessions — resume/continue/compact keep the store, teams keep the team store, forks carry it), the one command the block printed governed a different gate and refused anyway, the kill-switches only work in the launch environment (stated nowhere), and every block heartbeat the dead run's marker so it could never age out.
+Three verified gaps drove it: `INTERACTION_INTUITION_MAP.md` existed only when a pipeline's Phase −1D happened to produce it — and `playwright-user-flows` never read it; nothing grew the map from user-specified flows or debugging discoveries; and the Playwright suite had no durable registry — no inventory, no whole-suite run at full integration, no dev/prod safety split.
 
-**Inherited debt, not a wedge.** An open task untouched longer than the abandonment window (`CT6_TASK_STALE_HOURS`, floored at 1h, defaulting to the marker window) is listed in the block — store dir named — and blocks nothing. Any `TaskUpdate` revives it into ordinary blocking work.
+**The map becomes a guaranteed, growing asset.** The new `intuition-map-lifecycle` skill gives every lane three verbs: **ensure** (absent → produce it; presence alone does not satisfy — a freshly scaffolded zero-element map reports `populate`, never `none`), **grow** (a user-specified flow upserts as confirmed — the user specifying the flow IS the confirmation; a contradiction with a confirmed entry leaves it byte-identical and asks a targeted question quoting both readings), and **bug-path-upsert** (debugging discoveries land with `regression_refs[]` naming the tests that pin them). Stdlib engine, additive schema, CRLF-preserving byte-fidelity rewrites.
 
-**An operator verb that cannot overreach.** `open_work.py retire` closes a dead list with an audit trail and *refuses live tasks without `--force`* — it structurally cannot release a turn the lock is actually holding, which is exactly what makes it safe to document.
+**The suite becomes a durable artifact.** The new `playwright-suite-builder` skill + `/architect-team:playwright-suite` command drive P0–P9: inventory reconciled against a committed `suite-manifest.json`, existing-test review through the standing verification gates (never duplicated), suite-wide gap analysis and gap-fill per the full authoring discipline, debug-flow registration, persona grouping into Playwright `dev`/`prod` projects, and default-deny production safety — a mutating test enters the prod project only through a fully-authorized exception (nine adversary bypass manifests refused through the real CLI). The 7th pipeline-driving skill, registered everywhere a run-driving lane must be.
 
-**Messages that tell the truth.** The block now states the launch-env fact; `REFUSED --mark-complete` names `--stand-down` as the abandonment verb; the heartbeat is scoped to engaged sessions so dead runs actually go stale; and the darwin-red backslash pin recorded in the v3.63.0 measurement is closed — the suite measures **0 failed** again.
+**Full integration runs the whole suite.** Phase 5 and `dev-api-integration-testing` enumerate the manifest and run the ENTIRE dev suite; `mini-review-sweep` gains the full-suite gate while mini itself stays narrow; `ux-test` and `bug-fix` grow the map and register flows as they work. Eight thin pin-tested hooks; an absent manifest changes nothing — the named migration boundary.
 
 Full detail in [`CHANGELOG.md`](CHANGELOG.md) and [`docs/RELEASE_HISTORY.md`](docs/RELEASE_HISTORY.md).
 
@@ -100,7 +100,7 @@ Full detail in [`CHANGELOG.md`](CHANGELOG.md) and [`docs/RELEASE_HISTORY.md`](do
 ```
 
 ```
-┌─ SKILLS (53) ───────────────────────┬─ AGENTS (39) ─────────────────────────┐
+┌─ SKILLS (55) ───────────────────────┬─ AGENTS (39) ─────────────────────────┐
 │ ◇ architect-team-pipeline           │ ◆ system-architect (fable)            │
 │ ◇ intake-and-mapping                │ ◆ frontend (fable)                    │
 │ ◇ reuse-first-design                │ ◆ backend (fable)                     │
@@ -157,7 +157,16 @@ Full detail in [`CHANGELOG.md`](CHANGELOG.md) and [`docs/RELEASE_HISTORY.md`](do
 │ ◇ helpdesk (v3.21.0)                │                                       │
 │ ◇ token-compression (v3.22.0)       │                                       │
 │ ◇ claude-design-import (v3.33.0)    │                                       │
-├─ COMMANDS (25) ─────────────────────┴───────────────────────────────────────┤
+│ ◇ delivery-manifest (v3.46.0)       │                                       │
+│ ◇ contract-first-parallelism        │                                       │
+│   (v3.48.0 — mock-first parallel)   │                                       │
+│ ◇ data-eng-pipeline (v3.50.0)       │                                       │
+│ ◇ warehouse-sql-mining (v3.51.0)    │                                       │
+│ ◇ data-annotations (v3.52.0)        │                                       │
+│ ◇ intuition-map-lifecycle (v3.65.0) │                                       │
+│ ◇ playwright-suite-builder          │                                       │
+│   (v3.65.0 — P0–P9 suite lane)      │                                       │
+├─ COMMANDS (26) ─────────────────────┴───────────────────────────────────────┤
 │ ▸ /architect-team <path-to-requirements-folder | free-text prompt>          │
 │ ▸ /architect-team:architect-team-setup                                      │
 │ ▸ /architect-team:visual-qa [<codebase-path>]                               │
@@ -165,9 +174,13 @@ Full detail in [`CHANGELOG.md`](CHANGELOG.md) and [`docs/RELEASE_HISTORY.md`](do
 │ ▸ /architect-team:mempalace-install                                         │
 │ ▸ /architect-team:librarian-install [status|add-topic|run-once|uninstall]   │
 │   (v3.29.0 — install the topic-research Librarian background daemon)        │
+│ ▸ /architect-team:knowledge-install [status|print-registration|uninstall]   │
+│   (v3.49.0 — install the standing repo-knowledge MCP server)                │
 │ ▸ /architect-team:memory <search|mine|status|wake-up|sweep>                 │
 │ ▸ /architect-team:editability-audit [<codebase-path>]                       │
 │ ▸ /architect-team:bug-fix <bug-description | requirements-folder>           │
+│ ▸ /architect-team:data-eng <requirement | requirements-folder>              │
+│   (v3.50.0 — the data-engineering lane, phases D−1…D8)                      │
 │ ▸ /architect-team:ux-test <persona + objectives + --site or --dev>          │
 │ ▸ /architect-team:refine-prompt <free-text prompt>      (standalone refine) │
 │ ▸ /architect-team:mini <requirements-folder | free-text prompt>             │
@@ -189,6 +202,8 @@ Full detail in [`CHANGELOG.md`](CHANGELOG.md) and [`docs/RELEASE_HISTORY.md`](do
 │   (v3.18.0 — doc-currency double-check before compact / end-of-work)        │
 │ ▸ /architect-team:logit [--privacy <full|summary|off>]                      │
 │   (v3.21.0 — manual triage report; consent + privacy)                       │
+│ ▸ /architect-team:playwright-suite [<codebase-path> | <description>]        │
+│   (v3.65.0 — durable persona-grouped suite + dev/prod manifest, P0–P9)      │
 ├─ HOOKS (7 scripts / 8 events) ──────────────────────────────────────────────┤
 │ ▸ PreToolUse(*)             skill-invocation hard-gate (v3.15.0/1)          │
 │                             + v3.30.0 sticky run arm (active-run marker =>  │
@@ -716,10 +731,15 @@ does not mean the exit is gone. Same family as the `Bash` boundary below.
 It is not airtight, and pretending otherwise would violate this project's own
 [`docs/ETHOS.md`](docs/ETHOS.md).
 
-- **`TaskUpdate(status="deleted")` releases it.** The harness *unlinks* a
-  deleted task's JSON file, so the lock reads a clean-empty directory and lets
-  the stop through. Deletion is a first-class, legitimate harness operation; no
-  hook tier can or should forbid it. **There is no mitigation by default.** An
+- **`TaskUpdate(status="deleted")` releases it — in plain non-run sessions.**
+  The harness *unlinks* a deleted task's JSON file, so the lock reads a
+  clean-empty directory and lets the stop through. Since v3.61.0 the O2 arm
+  REFUSES the deletion at `PreToolUse` during an ACTIVE run on payload-only
+  evidence (`completed` stays legitimate; kill-switch
+  `CT6_TASK_DELETE_GATE_DISABLED`), so this release path is closed exactly
+  where a run is in flight; outside an active run, deletion is a first-class,
+  legitimate harness operation no hook tier can or should forbid.
+  **There, no mitigation applies by default.** An
   earlier revision claimed the ask-ledger covered this; that became false when
   the ledger was demoted to advisory and was never swept. The ledger does not
   block on its own, and its advisory FYI listing renders only INSIDE a block —
@@ -1225,7 +1245,7 @@ escalates to the human.
 python -m pytest -v
 ```
 
-Tests validate: plugin/marketplace JSON; all 53 skill frontmatters; all 39 agent frontmatters (tool + model names); all 25 commands; the v3.31.0 instruction-compliance lint (`tests/test_instruction_compliance.py` — the deterministic engine's enforced zero-findings gate across all 120 in-scope instruction files, plus the uniform 1024-char raw-description cap for agents + commands); hooks.json wiring for all eight trigger events (PreToolUse + PostToolUse + SubagentStop + Stop + the v1.0.0 TaskCompleted + TeammateIdle + the v3.18.0 PreCompact + the v3.30.0 SessionStart); hook script logic (review-gate + teammate-idle share one `review_evidence_schema` module — evidence schema v7: 17 self-review fields + the independent `task-reviewer` verdict; the `pretool_unilateral_override_guard` PreToolUse hook; the `pipeline-completion-audit` Stop hook incl. the master-review audit check and the v3.56.0 completion lock — its placement above every agent-written release path, the four kill-switches, teammate owner-scoping, and the block-vs-fail-open split of the `hooks/open_work.py` substrate, plus the v3.64.0 abandonment discrimination (inherited-stale tasks surface, never block; the retire surface refuses live tasks without --force); path-traversal sanitization); cross-component consistency (the two evidence hooks cannot drift; the Stop hook's origin set matches the pipeline; no unregistered skills/agents/commands); the setup + MemPalace install scripts; the `scripts/notify/notify.py` notifier (config load/validate, Gmail + SendGrid message construction with mocked transport, event dispatch, secret resolution, CLI + failure isolation) and its pipeline wiring; the v1.0.0 teams-mode detection helper (`scripts/setup/teams_mode.py`) + the cross-session lock layer (`hooks/locks.py`); the v1.1.0 worktree-aware state-resolution helper (`scripts/setup/worktree_paths.py`) including the cross-worktree lock-coordination integration test (acquire from a real `git worktree add`-created worktree blocks an intersecting acquire from main with the default `locks_dir`); the v1.2.0+v1.3.0+v3.6.0 worktree-lifecycle helper (`scripts/setup/worktree_lifecycle.py`) including `create_run_worktree` (now at the v3.6.0 hidden per-project container layout `<parent>/.<repo>-worktrees/<slug>/`) + collision handling, `current_worktree_is_run` True / False detection, `current_run_slug` extraction, `cleanup_run_worktree` with + without branch removal, the v1.3.0 auto-cleanup helpers (`list_merged_architect_team_worktrees` with `exclude_current` safeguard; `cleanup_merged_worktrees` with `dry_run` preview; end-to-end cleanup-only-removes-merged), and the v3.6.0 `finalize_run_worktree` end-of-run merge check (remove-when-merged / warn-when-unmerged / no-op-on-non-run-branch) + dual-layout (old-flat + new-container) slug derivation & sweep, and the v3.7.0 auto-merge-to-main helpers (`list_run_branches` per-branch merged / cleanly-mergeable status excluding non-architect-team branches; `merge_branch_to_main_and_prune` clean-merge→push→delete-branch→remove-worktree with conflict-abort-changes-nothing and never-`--force` safety)) — all exercising real `git init` + `git worktree add` fixtures with no git mocks; and the no-arbitrary-timers, diagnostic-research, MemPalace-integration, integration-testing, expensive-verification, editability-completeness, readme-styling, design-baseline-migration, visual-verification-team, producer-checker-enforcement, mempalace-mine-syntax, documentation-currency, project-email-notifications, ui-interaction-fidelity, email-testing, proposal-refiner, ux-test-builder, bug-fix-pipeline, code-path-witness, mini-architect-team-pipeline, agent-teams-mode, and scope-discipline (v1.4.0 — `tests/test_scope_discipline.py` audits the canonical `## Scope discipline` section in `common-pipeline-conventions/SKILL.md`, the 6 parity-implying verbs documented in the section + the bug-classifier action-verb section, the 3 pipeline body references, the prompt-refiner 6th `scope-fidelity` axis + grade-schema, the proposal-refiner Phase R2 documentation of the axis + new weights, and the system-architect Master Review Audit + Phase 2 architect brief scope-narrowing checks) disciplines. **7829 tests pass (+ 16 skipped, 0 failed, across 255 top-level test files — disk-anchored via `git ls-files 'tests/test_*.py'`; measured on macOS without PyYAML at v3.64.0 with identical counts under the default env and `PYTHONUTF8=1`, recorded at `docs/measurements/2026-08-24-v3.64.0-suite.json`; the 16 skips are 14 PyYAML-gated + 2 archived-coverage-map — a PyYAML-present host reports fewer).**
+Tests validate: plugin/marketplace JSON; all 55 skill frontmatters; all 39 agent frontmatters (tool + model names); all 26 commands; the v3.31.0 instruction-compliance lint (`tests/test_instruction_compliance.py` — the deterministic engine's enforced zero-findings gate across all 123 in-scope instruction files, plus the uniform 1024-char raw-description cap for agents + commands); hooks.json wiring for all eight trigger events (PreToolUse + PostToolUse + SubagentStop + Stop + the v1.0.0 TaskCompleted + TeammateIdle + the v3.18.0 PreCompact + the v3.30.0 SessionStart); hook script logic (review-gate + teammate-idle share one `review_evidence_schema` module — evidence schema v7: 17 self-review fields + the independent `task-reviewer` verdict; the `pretool_unilateral_override_guard` PreToolUse hook; the `pipeline-completion-audit` Stop hook incl. the master-review audit check and the v3.56.0 completion lock — its placement above every agent-written release path, the four kill-switches, teammate owner-scoping, and the block-vs-fail-open split of the `hooks/open_work.py` substrate, plus the v3.64.0 abandonment discrimination (inherited-stale tasks surface, never block; the retire surface refuses live tasks without --force); path-traversal sanitization); cross-component consistency (the two evidence hooks cannot drift; the Stop hook's origin set matches the pipeline; no unregistered skills/agents/commands); the setup + MemPalace install scripts; the `scripts/notify/notify.py` notifier (config load/validate, Gmail + SendGrid message construction with mocked transport, event dispatch, secret resolution, CLI + failure isolation) and its pipeline wiring; the v1.0.0 teams-mode detection helper (`scripts/setup/teams_mode.py`) + the cross-session lock layer (`hooks/locks.py`); the v1.1.0 worktree-aware state-resolution helper (`scripts/setup/worktree_paths.py`) including the cross-worktree lock-coordination integration test (acquire from a real `git worktree add`-created worktree blocks an intersecting acquire from main with the default `locks_dir`); the v1.2.0+v1.3.0+v3.6.0 worktree-lifecycle helper (`scripts/setup/worktree_lifecycle.py`) including `create_run_worktree` (now at the v3.6.0 hidden per-project container layout `<parent>/.<repo>-worktrees/<slug>/`) + collision handling, `current_worktree_is_run` True / False detection, `current_run_slug` extraction, `cleanup_run_worktree` with + without branch removal, the v1.3.0 auto-cleanup helpers (`list_merged_architect_team_worktrees` with `exclude_current` safeguard; `cleanup_merged_worktrees` with `dry_run` preview; end-to-end cleanup-only-removes-merged), and the v3.6.0 `finalize_run_worktree` end-of-run merge check (remove-when-merged / warn-when-unmerged / no-op-on-non-run-branch) + dual-layout (old-flat + new-container) slug derivation & sweep, and the v3.7.0 auto-merge-to-main helpers (`list_run_branches` per-branch merged / cleanly-mergeable status excluding non-architect-team branches; `merge_branch_to_main_and_prune` clean-merge→push→delete-branch→remove-worktree with conflict-abort-changes-nothing and never-`--force` safety)) — all exercising real `git init` + `git worktree add` fixtures with no git mocks; and the no-arbitrary-timers, diagnostic-research, MemPalace-integration, integration-testing, expensive-verification, editability-completeness, readme-styling, design-baseline-migration, visual-verification-team, producer-checker-enforcement, mempalace-mine-syntax, documentation-currency, project-email-notifications, ui-interaction-fidelity, email-testing, proposal-refiner, ux-test-builder, bug-fix-pipeline, code-path-witness, mini-architect-team-pipeline, agent-teams-mode, scope-discipline (v1.4.0 — `tests/test_scope_discipline.py` audits the canonical `## Scope discipline` section in `common-pipeline-conventions/SKILL.md`, the 6 parity-implying verbs documented in the section + the bug-classifier action-verb section, the 3 pipeline body references, the prompt-refiner 6th `scope-fidelity` axis + grade-schema, the proposal-refiner Phase R2 documentation of the axis + new weights, and the system-architect Master Review Audit + Phase 2 architect brief scope-narrowing checks), and playwright-suite-intuition-lifecycle (v3.65.0 — the `intuition-map-lifecycle` ensure/grow/bug-path-upsert engine, the `suite-manifest.json` schema engine + `verify-suite-manifest` with default-deny prod safety, the 8 thin lane hooks, and the run-driving registry additions — 4 new test files) disciplines. **8205 tests pass (+ 6 skipped, 0 failed, across 259 top-level test files — disk-anchored via `git ls-files 'tests/test_*.py'`; measured on Windows/win32 at v3.65.0, the first win32-recorded bracket since the counting doctrine landed, recorded under `docs/measurements/` as the release's closing act; the win32/darwin skip-profile difference is real — the prior v3.64.0 darwin basis reported 16 skips, 14 PyYAML-gated + 2 archived-coverage-map, and a PyYAML-present host reports fewer).**
 
 ### Bumping versions
 
@@ -1247,14 +1267,13 @@ Tests validate: plugin/marketplace JSON; all 53 skill frontmatters; all 39 agent
 ```
    ▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
 
-   ◆       v3.56.0 ─ turn-boundary-completion-lock — a session cannot end
-           its turn while registered work is open, and the condition is
-           READ FROM DISK (the harness task list + a transcript-derived
-           ask-ledger), never asserted by the agent. Fires in EVERY
-           session, in every project; released only by the human, via
-           CT6_COMPLETION_LOCK_DISABLED or one of three per-source
-           switches. Defeatable by task DELETION — boundary stated, not
-           sanded off
+   ◆       v3.65.0 ─ playwright-suite-intuition-lifecycle — the
+           interaction-intuition map becomes a guaranteed, growing,
+           debugging-fed asset (ensure / grow / bug-path-upsert), and
+           the Playwright suite becomes a durable artifact: a committed
+           suite-manifest.json, persona-grouped dev/prod projects,
+           default-deny production safety, and full integration running
+           the ENTIRE dev suite. The 7th pipeline-driving skill
 
            Full release timeline (every version) → docs/RELEASE_HISTORY.md
 
