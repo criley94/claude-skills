@@ -127,6 +127,8 @@ This file is consulted by every subsequent step. The interactivity inventory tra
 
 Read `<codebase>/docs/ROUTE_MAP.md` for every route the flow traverses. If `last_routed` is older than the codebase's latest commit, request re-mapping via the intake skill before continuing — tests built on stale assumptions are worse than no tests.
 
+**Ensure and consult the interaction-intuition map.** `<codebase>/docs/INTERACTION_INTUITION_MAP.md` is the per-element record of what each control does and which endpoint it calls — exactly the selectors and endpoints Steps 2-4 would otherwise re-derive by hand, and it exists only when a pipeline run's Phase −1D produced it. So do not assume it: ensure it via the `intuition-map-lifecycle` skill's `ensure` verb, then consult it alongside `ROUTE_MAP.md` for every element the flow touches. **A map's mere PRESENCE does not satisfy the precondition.** The verb reports what is still owed in `action_required`, and ensure is complete only when that reads `none` — a present map that will not parse reports `repair-map`, and a present, schema-valid map carrying zero elements reports `populate`, so a freshly written scaffold still owes you its elements. Treat any value other than `none` as work to do before authoring, and read `intuition-map-lifecycle` for the full verdict set rather than re-deriving it here. An entry carrying `user_verdict: confirmed` is a settled fact about that element's action and endpoint — author to it rather than re-guessing. An unconfirmed, low-confidence, or `unknown` entry is a candidate to verify while tracing, never a fact to assert.
+
 ### Step 2: Enumerate interactive elements (exhaustive)
 
 Read the actual component code for each route's component tree. List EVERY interactive element — no exceptions, no "I'll just cover the obvious ones":
@@ -542,6 +544,8 @@ Write `<test-output-dir>/playwright-coverage.json`:
 ```
 
 If `gaps` is non-empty, add tests (or escalate to the user for missing goals) until it is empty. Then this file goes into the review-gate evidence.
+
+**Register the authored flows in the suite manifest.** When the codebase carries `<e2e-dir>/suite-manifest.json`, register the flows this pass authored there per `playwright-suite-builder` — file, test names, persona, kind, and the `covers_elements[]` this coverage check just computed — so the suite's registry of "which tests are written" stays true after this pass ends. Absent a suite manifest, behavior is unchanged.
 
 ### Emit the integration_testing_review verdict
 

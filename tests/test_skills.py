@@ -59,6 +59,8 @@ EXPECTED_SKILLS: set[str] = {
     "helpdesk",
     "token-compression",
     "claude-design-import",
+    "intuition-map-lifecycle",
+    "playwright-suite-builder",
 }
 
 REQUIRED_FRONTMATTER_KEYS = {"name", "description"}

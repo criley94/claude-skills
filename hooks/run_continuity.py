@@ -137,16 +137,22 @@ MIN_MARKER_STALE_HOURS = 1.0
 COMPLETION_LOG_FILENAME = "run-completion.log"
 
 # Skills whose invocation ENGAGES (writes/refreshes) the active-run marker —
-# the five run-driving orchestrator playbooks (v3.55.4 added the data-eng lane).
+# the six run-driving orchestrator playbooks (v3.55.4 added the data-eng lane;
+# playwright-suite-builder joined with the suite-builder lane).
 # proposal-refiner deliberately
 # does NOT engage a marker (it also runs standalone via /refine-prompt, which
 # must never leave a workspace stuck in run-active state).
+# Membership here is a CONTRACT, not a label: it opens the marker, and the
+# marker clears only via --mark-complete / an explicit stand-down / staleness.
+# So a lane belongs here ONLY once its playbook marks the run complete —
+# registering one that never does wedges every one of its runs (v3.61.2).
 RUN_DRIVING_SKILLS: frozenset[str] = frozenset({
     "architect-team-pipeline",
     "bug-fix-pipeline",
     "ux-test-builder",
     "mini-architect-team-pipeline",
     "data-eng-pipeline",
+    "playwright-suite-builder",
 })
 
 # Skills whose invocation counts as the session OPERATING UNDER the pipeline

@@ -10,6 +10,7 @@ The formal per-version log is [`CHANGELOG.md`](../CHANGELOG.md); this file is th
 
 Every release, newest first — the one-line index the README used to carry. Full detail for each is in the per-release sections below and in [`CHANGELOG.md`](../CHANGELOG.md).
 
+- `v3.65.0` — playwright-suite-intuition-lifecycle
 - `v3.64.0` — inherited-task-debt
 - `v3.63.0` — bauplan-skills-dependency
 - `v3.62.0` — review-evidence-binding
@@ -164,7 +165,25 @@ Every release, newest first — the one-line index the README used to carry. Ful
 
 ```
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-█▓▒░  ◆  NEW IN v3.63.0  ◆  ░▒▓█
+█▓▒░  ◆  NEW IN v3.65.0  ◆  ░▒▓█
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+```
+
+### v3.65.0 — playwright-suite-intuition-lifecycle: a lifecycle for the intuition map, a durable registry for the Playwright suite
+
+Three verified gaps drove it: `INTERACTION_INTUITION_MAP.md` existed only when a pipeline's Phase −1D happened to produce it — and `playwright-user-flows` never read it; nothing grew the map from user-specified flows or debugging discoveries; and the Playwright suite had no durable registry — no inventory, no whole-suite run at full integration, no dev/prod safety split.
+
+**The map becomes a guaranteed, growing asset.** The new `intuition-map-lifecycle` skill gives every lane three verbs: **ensure** (absent → produce it; presence alone does not satisfy — a freshly scaffolded zero-element map reports `populate`, never `none`), **grow** (a user-specified flow upserts as confirmed — the user specifying the flow IS the confirmation; a contradiction with a confirmed entry leaves it byte-identical and asks a targeted question quoting both readings), and **bug-path-upsert** (debugging discoveries land with `regression_refs[]` naming the tests that pin them). Stdlib engine, additive schema, CRLF-preserving byte-fidelity rewrites.
+
+**The suite becomes a durable artifact.** The new `playwright-suite-builder` skill + `/architect-team:playwright-suite` command drive P0–P9: inventory reconciled against a committed `suite-manifest.json`, existing-test review through the standing verification gates (never duplicated), suite-wide gap analysis and gap-fill per the full authoring discipline, debug-flow registration, persona grouping into Playwright `dev`/`prod` projects, and default-deny production safety — a mutating test enters the prod project only through a fully-authorized exception (nine adversary bypass manifests refused through the real CLI). The 7th pipeline-driving skill, registered everywhere a run-driving lane must be.
+
+**Full integration runs the whole suite.** Phase 5 and `dev-api-integration-testing` enumerate the manifest and run the ENTIRE dev suite; `mini-review-sweep` gains the full-suite gate while mini itself stays narrow; `ux-test` and `bug-fix` grow the map and register flows as they work. Eight thin pin-tested hooks; an absent manifest changes nothing — the named migration boundary.
+
+Full detail in [`CHANGELOG.md`](../CHANGELOG.md).
+
+```
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+█▓▒░  ◆  NEW IN v3.64.0  ◆  ░▒▓█
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ```
 
@@ -183,6 +202,12 @@ A production workspace reported the lock blocking every turn with no working ove
 **The darwin red goes green.** The measurement-immutability arm's backslash-spelling pin — red on macOS since it shipped, honestly recorded in the v3.63.0 artifact — is closed; the suite measures 0 failed again.
 
 Full detail in [`CHANGELOG.md`](../CHANGELOG.md).
+
+```
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+█▓▒░  ◆  NEW IN v3.63.0  ◆  ░▒▓█
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+```
 
 ### v3.63.0 — bauplan-skills-dependency: a dependency that costs nothing where it does not apply
 

@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "change_name": "playwright-suite-intuition-lifecycle",
+  "source_brief": "docs/proposals/PLAYWRIGHT_SUITE_AND_INTUITION_LIFECYCLE.md",
+  "authored_at": "2026-08-26T04:30:00Z",
+  "global_authorizations": {
+    "playwright_criteria": "N/A - this change ships plugin capability (markdown skills + stdlib Python engines) in a repo with no frontend codebase; no requirement here has a UI surface. The e2e suites the skills DESCRIBE are output contracts exercised in target projects. House verification for this repo is the red-first pytest suite. Recorded per the Phase 1 rule requiring explicit authorization for absent Playwright criteria.",
+    "dev_api_integration_criteria": "N/A - no backend service or dev API exists in this repo; engines are pure stdlib libraries with CLIs, verified by pytest (red-first, both encodings). Recorded per the Phase 1 rule.",
+    "interaction_intuition_map_criteria": "N/A - no frontend codebase in scope, Phase -1D was a silent no-op; recorded per the Phase 1 rule."
+  },
+  "entries": [
+    {
+      "source_requirement_id": "R1-map-existence-guaranteed",
+      "spec_requirement_id": "intuition-map-lifecycle/The ensure verb guarantees the intuition map exists before test authoring",
+      "scenarios": ["ensure creates a missing map before authoring proceeds", "ensure is a cheap no-op when the map exists", "suite-pipeline-wiring: Step 1 names the lifecycle ensure"],
+      "acceptance_criteria": [
+        "A1: engine + skill path produce a schema-conforming map when absent, before any test authoring; ad-hoc path surfaces low/unknown items as the inline bulk-verify list (pytest: test_intuition_lifecycle.py ensure-path fixtures)",
+        "A1-wiring: playwright-user-flows Step 1 text names the intuition-map-lifecycle ensure verb + consult obligation (pytest pins: test_playwright_suite_hooks.py - step1 ensure/consult/present-not-satisfied pins; attribution corrected per TCV-1)"
+      ],
+      "tasks": ["1.1", "1.2", "2.1", "3.1", "3.7"],
+      "layer": "backend"
+    },
+    {
+      "source_requirement_id": "R2-map-grows-from-user-flows",
+      "spec_requirement_id": "intuition-map-lifecycle/The grow verb upserts user-specified flows as confirmed entries",
+      "scenarios": ["a user flow lands as confirmed entries", "a contradiction surfaces a question instead of an overwrite", "suite-pipeline-wiring: the lane texts name their verbs (ux-test grow)"],
+      "acceptance_criteria": [
+        "A2: engine upserts user-flow entries as confirmed/source:user-flow; contradiction leaves the existing entry unmodified AND produces a question artifact - both directions red-first tested with mutation witnesses (pytest: test_intuition_lifecycle.py)",
+        "A2-wiring: ux-test-builder text names grow at U2/U5 and manifest registration at U9 (pytest pin)"
+      ],
+      "tasks": ["1.1", "1.2", "1.5", "2.1", "3.2", "3.7"],
+      "layer": "backend"
+    },
+    {
+      "source_requirement_id": "R3-debugging-feeds-back",
+      "spec_requirement_id": "intuition-map-lifecycle/The bug-path-upsert verb records debugging discoveries in the map",
+      "scenarios": ["a resolved bug path reaches the map", "suite-manifest: a debug-flow without provenance blocks", "suite-pipeline-wiring: the lane texts name their verbs (bug-fix upsert + registration)"],
+      "acceptance_criteria": [
+        "A3: engine writes source:bug-path entries with regression_refs[] naming the debug-flow test + bug ref (pytest: test_intuition_lifecycle.py)",
+        "A3-wiring: bug-fix-pipeline text names bug-path-upsert at B2 and debug-flow manifest registration at B7/B8 (pytest pin); verify-suite-manifest blocks a debug-flow entry with dead origin_ref (pytest: test_suite_manifest.py)"
+      ],
+      "tasks": ["1.1", "1.2", "1.3", "1.4", "2.1", "3.3", "3.7"],
+      "layer": "backend"
+    },
+    {
+      "source_requirement_id": "R4-callable-suite-builder",
+      "spec_requirement_id": "playwright-suite-builder/A callable suite-builder orchestrates the P0-P9 phases + playwright-suite-builder/The suite-builder reuses existing checkers and adds no new agents",
+      "scenarios": ["a suite-builder run on a fixture project produces a valid grouped suite", "e2e-dir resolution follows the target repo's convention", "freshness refresh routes through the lifecycle skill", "review stages name the existing checkers"],
+      "acceptance_criteria": [
+        "A4: skill body documents P0-P9 exactly (e2e-dir ladder, frontend_impact.py freshness, checker DISPATCH, Step-0 escalation for unknown personas, migration boundary) - pytest pins on the skill text; engine-backed stages (inventory reconcile, manifest write) covered by test_suite_manifest.py fixture-project fixtures",
+        "A4-command: commands/playwright-suite.md exists, binds the skill, carries standard flags (pytest pin); counts 53->55 skills / 25->26 commands reflected in doc grids at Phase 8"
+      ],
+      "tasks": ["1.3", "1.4", "2.3", "2.4", "2.5", "4.1"],
+      "layer": "infra"
+    },
+    {
+      "source_requirement_id": "R5-full-integration-runs-entire-suite",
+      "spec_requirement_id": "suite-pipeline-wiring/Full integration testing enumerates the manifest and runs the entire dev suite",
+      "scenarios": ["Phase 5 names the manifest as the enumeration source", "mini stays narrow while the sweep runs the suite"],
+      "acceptance_criteria": [
+        "A5: architect-team-pipeline Phase 5 + dev-api-integration-testing texts name suite-manifest.json enumeration of the ENTIRE dev suite when present AND state absent-manifest behavior unchanged (pytest pins); agents/integration.md brief updated (pin); mini narrow-behavior unchanged + mini-review-sweep names the full-suite run (pins)"
+      ],
+      "tasks": ["3.4", "3.5", "3.7"],
+      "layer": "infra"
+    },
+    {
+      "source_requirement_id": "R6-dev-prod-split",
+      "spec_requirement_id": "suite-dev-prod-safety/Dev and prod suites split on classifier-bound safety + suite-dev-prod-safety/Prod mutation requires an explicit authorized exception + suite-dev-prod-safety/The prod suite is a runnable smoke suite",
+      "scenarios": ["classifier verdicts are bound per test", "unclassified tests never enter prod", "an authorized exception admits a mutating prod test", "authorization without the test-only tag still blocks", "test-run-monitor names the prod suite"],
+      "acceptance_criteria": [
+        "A6: manifest binds safety + mutates_data per test; prod default-deny verified by verify-suite-manifest (unauthorized mutating prod test = blocking finding, red-first with mutation witness); prod_exceptions require authorization + it-prefix tag + teardown (partial exception still blocks - red-first); test-run-monitor + test-prod-safety-classifier texts carry their notes (pytest pins)"
+      ],
+      "tasks": ["1.3", "1.4", "1.5", "3.6", "3.7"],
+      "layer": "backend"
+    },
+    {
+      "source_requirement_id": "V-deterministic-verification",
+      "spec_requirement_id": "suite-manifest/The suite manifest is the durable per-codebase registry + suite-manifest/verify-suite-manifest is the deterministic ship check",
+      "scenarios": ["the engine validates a conforming manifest", "the engine rejects a malformed manifest", "an unauthorized mutating test in prod blocks", "a dangling manifest entry blocks", "a debug-flow without provenance blocks"],
+      "acceptance_criteria": [
+        "A7: verify-suite-manifest implements (a) two-direction disk reconciliation, (b) prod subset rule, (c) debug-flow origin_ref liveness, (d) schema validity - each violation a blocking finding, red-first tests + mutation witnesses (pytest: test_suite_manifest.py); both-encodings green"
+      ],
+      "tasks": ["1.3", "1.4", "1.5", "4.2"],
+      "layer": "backend"
+    }
+  ],
+  "confirmed_stubs": [],
+  "implementing_commits": []
+}

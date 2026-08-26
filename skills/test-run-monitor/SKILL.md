@@ -37,6 +37,8 @@ The user reads the produced report. The user decides what (if anything) becomes 
 
 If `$MONITOR_INPUT` matches multiple forms (e.g., both starts with `pytest` AND contains `--ci-job`), the first explicit `--ci-job` / `--apm-url` / `--log-tail` flag wins; otherwise fall back to LocalAdapter.
 
+**The suite-manifest prod project is a named test source.** A target codebase whose `<e2e-dir>/suite-manifest.json` defines a `prod` Playwright project — the default-deny, read-only `prod-check` set, per `playwright-suite-builder` — is a first-class runnable source for scheduled production health checks. It needs no new input form: pass the prod project's Playwright command as `$MONITOR_INPUT` (e.g. `playwright test --project=prod`) with the target pointed at the production URL, and the table's first row selects `LocalAdapter`, which spawns it exactly as it spawns any other test command. That routing is CORRECT, not a gap being papered over — running a prod suite IS a test-command spawn, so the existing fall-through already resolves it to the right adapter, with no new row, no new prerequisite, and no adapter change. Mind the adapter split, because the name invites the wrong guess: `ProductionQAAdapter` OBSERVES a signal production is already emitting (it polls an APM endpoint, or tails a log file) and does not execute anything, so it cannot spawn this run and is not the path for it. This skill's passive contract is unchanged either way — the monitor spawns, watches, and reports; it never gates. Absent a suite manifest, the recognized forms above are unchanged.
+
 ## Phase M1 — Source detection + adapter selection
 
 1. Resolve `<workspace>` via `git -C <cwd> rev-parse --show-toplevel` (cwd fallback).
