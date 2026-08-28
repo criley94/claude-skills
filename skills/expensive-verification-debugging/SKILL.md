@@ -27,6 +27,8 @@ This skill is the cost-aware companion to `root-cause-test-failures`. RCA's 3-pa
 
 This skill does NOT fire for cheap-loop debugging (sub-second test re-runs, hot-reload). There, normal RCA is enough.
 
+**At verification-planning time, before the first cycle (v3.66.0).** Phase 1's "price the loop, name the cheapest faithful artifact, prove the remote environment is needed" reasoning is not only a debugging strategy — it is the general shape of choosing HOW to verify anything. The `verification-planning` skill generalises it to every verification: enumerate local run / dev environment / replay / seeded fixture / production, prove which venue the claim depends on, pick the cheapest faithful one, and record the plan. Apply it at planning time so the expensive cycle is never the first test of a claim a cheaper venue could settle.
+
 ## Phase 1 — Price the loop and name the cheapest faithful artifact
 
 Before touching any fix:

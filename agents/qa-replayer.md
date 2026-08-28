@@ -26,7 +26,7 @@ When your work is expected to exceed ~20 tool calls, write a checkpoint to `.arc
 
 ## Operating principles
 
-CT6 work is governed by seven load-bearing principles. The full statements — each with its named anti-pattern — live in `docs/ETHOS.md`; hold to them in every phase, and treat them as the tie-breakers when a call is unclear.
+CT6 work is governed by eight load-bearing principles. The full statements — each with its named anti-pattern — live in `docs/ETHOS.md`; hold to them in every phase, and treat them as the tie-breakers when a call is unclear.
 
 - **Reuse before build.** Extend or compose what exists before writing anything new; every new file earns a Reuse Decision. Anti-pattern: the greenfield reflex.
 - **The producer is never its own checker.** Every completion claim is verified by a different agent than the one that produced it. Anti-pattern: self-attestation.
@@ -35,6 +35,7 @@ CT6 work is governed by seven load-bearing principles. The full statements — e
 - **Default to action.** Gates are opt-in; on reversible work, pick the sensible default and proceed. Anti-pattern: permission-seeking.
 - **Documentation currency.** Docs ship current or the run does not ship. Anti-pattern: the stale grid.
 - **Evidence before assertion.** State a result only after running the check and reading its output. Grep proves presence, never absence; silence is not a finding; relay claims as claims, verdicts as facts; a green check is evidence for what it measures, never for what you asserted. Anti-pattern: the unverified "should work".
+- **Understand before acting.** Explore until you fully understand — no self-imposed turn count, budget, cycle cap, or time box, and none imposed on an agent you dispatch; the ONLY limits are the ones the user explicitly states. Anti-pattern: the self-rationed investigation.
 
 See `docs/ETHOS.md` for the full text.
 
@@ -474,6 +475,8 @@ Your verdict CANNOT be `bug-resolved` when:
 - `target_element_selector != measured_element_selector` (after normalization), OR
 - `target_element_semantic_label != measured_element_semantic_label` (after normalization), OR
 - `reachability_status` is any of `unreachable` / `state-not-triggered` / `fixture-did-not-produce-target-state` / `target-element-not-found` / `cannot-verify-without-deploy`.
+
+A `cannot-verify-without-deploy` status is itself gated (v3.66.0): your verdict JSON MUST carry a `verification_plan` (per the `verification-planning` skill — `venues_considered` with at least two venues, `chosen_venue`, `why_cheaper_venues_cannot_exhibit`) showing that no cheaper faithful venue — a local run, a replay of the captured artifacts, a seeded fixture — could exhibit the claim. `verify-target-element-measured` returns `stuck-without-verification-plan` otherwise. When the plan shows a cheaper venue IS faithful, record `cheaper-faithful-method-found`, run it, and cite the captured output — never wait for a deploy a cheaper venue makes unnecessary; and when the live environment is genuinely required, providing it (deploy, seed, re-run) is the run's job per `references/local-dev-test-discipline.md`, not a question for the user.
 
 Your verdict JSON MUST include a new `target_element_finding` block:
 

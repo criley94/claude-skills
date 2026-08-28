@@ -5,7 +5,7 @@ allowed-tools: Skill, Read, Glob, Grep, LS, Bash, Write, AskUserQuestion, TodoWr
 
 # Proposal Refiner — Standalone Invocation
 
-You are starting the `proposal-refiner` skill in **STANDALONE** mode against a free-text prompt. The skill grades the prompt across six axes (clarity, scope, acceptance, codebase grounding, conflict, scope-fidelity), generates codebase-anchored clarifying questions, iterates with you up to 5 cycles or until you confirm `ship it`, and writes the refined version to a markdown file. No downstream pipeline runs in this mode — that's the difference from `/architect-team` with free-text input (which runs the refiner THEN the architect-team-pipeline).
+You are starting the `proposal-refiner` skill in **STANDALONE** mode against a free-text prompt. The skill grades the prompt across six axes (clarity, scope, acceptance, codebase grounding, conflict, scope-fidelity), generates codebase-anchored clarifying questions, iterates with you until you confirm `ship it` or the grade reaches A (`--max-iterations` is your explicit cap if you want one; there is no agent-chosen default), and writes the refined version to a markdown file. No downstream pipeline runs in this mode — that's the difference from `/architect-team` with free-text input (which runs the refiner THEN the architect-team-pipeline).
 
 ## Argument parsing (do this first, before invoking the skill)
 
@@ -15,7 +15,7 @@ Parse `$ARGUMENTS` into a free-text prompt and optional flags:
 - `--out <path>` → override the default output path (`<cwd>/.architect-team/refined-prompts/<slug>-<ts>.md`). The path must be an absolute path or a path relative to `<cwd>`.
 - `--codebases <comma-separated-paths>` → explicit codebase paths to ground refinement against. Default: auto-discover from `<cwd>/.architect-team/intake-state.json`'s prior codebase list, or `<cwd>/codebases.json`, or — when neither exists and the prompt mentions code — prompt the user once during Phase R1.
 - `--no-mempalace` → skip the read-only MemPalace wake-up at Phase R1 (default: include it when the palace exists).
-- `--max-iterations <integer>` → override the default iteration ceiling of 5. Min 1, max 10.
+- `--max-iterations <integer>` → YOUR explicit cap on refinement rounds. Absent, the loop is unbounded — it runs until you confirm or the grade reaches A — with no agent-chosen default (per `docs/ETHOS.md` principle 8).
 
 Whitespace-separated tokens. Flags are independent.
 
@@ -36,7 +36,7 @@ Pass the parsed flags through to the skill's working state:
 - `$REFINER_OUT_PATH = <from --out, or default>`
 - `$REFINER_CODEBASES = <from --codebases, or auto-discover>`
 - `$REFINER_USE_MEMPALACE = <true unless --no-mempalace>`
-- `$REFINER_MAX_ITERATIONS = <from --max-iterations, or 5>`
+- `$REFINER_MAX_ITERATIONS = <from --max-iterations, or unbounded>`
 
 ## After the skill exits
 

@@ -662,6 +662,50 @@ def _detect_unreachable_state_not_escalated(
     }]
 
 
+def _detect_stuck_without_verification_plan(
+    verification_artifact: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """v3.66.0 — a `cannot-verify-without-deploy` verdict is legitimate ONLY
+    when the artifact carries a `verification_plan` (per the
+    `verification-planning` skill) showing that at least two venues were
+    considered and one was chosen. A stuck verdict with no plan is the
+    "I need to wait for a deploy" reflex — the shape this detector exists to
+    refuse. Any other reachability value is untouched here (the sibling
+    detectors own those)."""
+    reachability = (verification_artifact.get("reachability_status") or "").lower()
+    if reachability != "cannot-verify-without-deploy":
+        return []
+    plan = verification_artifact.get("verification_plan")
+    venues = plan.get("venues_considered") if isinstance(plan, dict) else None
+    named = [
+        v for v in venues
+        if isinstance(v, dict) and isinstance(v.get("venue"), str) and v["venue"].strip()
+    ] if isinstance(venues, list) else []
+    chosen = plan.get("chosen_venue") if isinstance(plan, dict) else None
+    if len(named) >= 2 and isinstance(chosen, str) and chosen.strip():
+        return []
+    return [{
+        "severity": "stuck-without-verification-plan",
+        "reachability_status": reachability,
+        "venues_considered": len(named),
+        "evidence": (
+            f"reachability_status={reachability!r} but the artifact carries no "
+            f"verification_plan with >= 2 venues considered and a chosen venue "
+            f"({len(named)} named). Waiting for a deploy is not a verification "
+            "method until the cheaper venues are shown unfaithful."
+        ),
+        "remediation": (
+            "Apply the verification-planning skill: enumerate local run / dev "
+            "environment / replay / seeded fixture / production, prove which venue "
+            "the claim depends on, and record venues_considered + chosen_venue + "
+            "why_cheaper_venues_cannot_exhibit. If a cheaper venue is faithful, "
+            "record cheaper-faithful-method-found, run it, and cite the output; if "
+            "the live environment is genuinely required, PROVIDE it (deploy, seed, "
+            "re-run) per references/local-dev-test-discipline.md."
+        ),
+    }]
+
+
 def _detect_semantic_target_mismatch(
     verification_artifact: dict[str, Any],
 ) -> list[dict[str, Any]]:
@@ -744,10 +788,13 @@ def verify_target_element_measured(
     proxy-substitution markers appear in verification text — backwards-
     compatible.
 
-    3 named severities:
+    4 named severities:
       - `proxy-element-substituted` — target ≠ measured selector while verdict is passing
       - `unreachable-state-not-escalated` — reachability_status != reached while verdict is passing
       - `semantic-target-mismatch` — target semantic label ≠ measured semantic label while verdict is passing
+      - `stuck-without-verification-plan` (v3.66.0) — reachability_status is
+        `cannot-verify-without-deploy` but no verification_plan with >= 2 venues
+        considered + a chosen venue accompanies it
     """
     artifact = verification_artifact or {}
     gaps: list[dict[str, Any]] = []
@@ -755,6 +802,7 @@ def verify_target_element_measured(
     gaps += _detect_unreachable_state_not_escalated(artifact)
     gaps += _detect_semantic_target_mismatch(artifact)
     gaps += _detect_proxy_substitution_markers_in_text(artifact)
+    gaps += _detect_stuck_without_verification_plan(artifact)
 
     verdict = {
         "tool": "verify-target-element-measured",

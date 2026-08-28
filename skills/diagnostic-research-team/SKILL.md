@@ -89,7 +89,8 @@ The researcher produces an ordered list of candidate root causes. Each hypothesi
 
 - **Anchored to file:line evidence** from the code flow examination (no "probably" / "might be" without a pointer).
 - **Falsifiable** — describes the specific observation that would refute it.
-- **Ranked by likelihood** — using the evidence weight, not gut feel. The hypothesis with the most evidence and the most-recent-change correlation goes first.
+- **Executed** — the falsification test was RUN, with `falsification_command` + verbatim `observed_output` recorded and `status` set (`survived` / `refuted` / `not-executable` with `not_executable_reason` naming the input the owner alone holds). Design is not execution.
+- **Ranked by executed evidence** — a hypothesis that survived executed falsification outranks any unexecuted one regardless of citations; an executed-refuted one ranks below everything still standing; recent-change correlation orders only the unexecuted remainder.
 - **Distinct from the originating teammate's working hypothesis** — at minimum, the researcher must consider one alternative that the teammate did not pursue. If the originating teammate's hypothesis is the strongest candidate, the researcher says so explicitly with its own evidence rather than rubber-stamping.
 
 Hypothesis schema (one entry per candidate):
@@ -102,6 +103,11 @@ Hypothesis schema (one entry per candidate):
     - "<file:line> — <what it shows>"
     - "<file:line> — <what it shows>"
   falsification_test: "<what observation would refute this>"
+  falsification_executed: true | false
+  falsification_command: "<exactly what was run to try to refute it>"
+  observed_output: "<verbatim captured output>"
+  status: survived | refuted | not-executable
+  not_executable_reason: "<ONLY for not-executable: the input the owner alone holds>"
   matches_originating_teammate_hypothesis: true | false
   fix_scope_estimate: single-team | cross-team | architecture-level
 ```
@@ -110,24 +116,25 @@ Three hypotheses minimum per researcher. More is fine; fewer is not allowed — 
 
 ### Researcher posture (hard rules)
 
-- Read-only on source code. Cannot Edit / Write source files; can only Write its own draft.
+- Read-only on SOURCE code — never on the system. Cannot Edit / Write source files; can Write its own draft and its scratch probes. MUST execute its falsification tests (probes, direct calls, instrumented reproductions) — a draft whose hypotheses are unexecuted is not a draft.
 - Cannot consult the other two researchers during Phase A. Parallel independence is the entire point of the three-researcher pattern.
 - Cannot lift the originating teammate's hypothesis without verification. Even if the originating teammate is correct, the researcher's draft must show its own evidence trail, not "agree with the teammate."
-- Cannot defer hypothesis ranking with phrases like "could be either X or Y." Pick the order based on evidence weight, then mark close calls explicitly in the falsification_test field.
+- Cannot defer with "could be either X or Y" — run the falsification that separates them. Cannot defer with "the fix team will verify" — that reversal is the anti-pattern named below. Cannot ration the investigation: no turn count, budget, or cycle cap (`docs/ETHOS.md` principle 8); the only pause is a named missing input the owner alone holds.
 
 ## Phase B — System-architect review for robustness
 
-After all three researchers report their drafts, the orchestrator dispatches the `system-architect` agent with all three drafts + the full input set. The architect's job is NOT to pick the right hypothesis — it is to ensure the three drafts COLLECTIVELY produce a robust diagnostic plan.
+After all three researchers report their drafts, the orchestrator dispatches the `system-architect` agent with all three drafts + the full input set. The architect does not pick a hypothesis by preference — it CONFIRMS the one that survived executed falsification while its competitors were executed-refuted, and ensures the three drafts COLLECTIVELY produce a robust, EXECUTED diagnostic plan. Convergence by agreement without execution is the failure mode; convergence by execution is the goal.
 
 The architect evaluates each draft and the set as a whole against this rubric:
 
 1. **Coverage** — does every code-flow hop with a plausible failure mode have at least one hypothesis attached to it? Hops mentioned in zero hypotheses are gaps.
-2. **Diversity** — do the three drafts collectively span product-bug, environment, contract-change, race, and test-author-error categories? Or did all three converge on the same category, leaving alternatives unexamined?
+2. **Diversity** — did the three drafts collectively CONSIDER product-bug, environment, contract-change, race, and test-author-error (named, and executed-or-reasoned-away with evidence)? A category nobody looked at is a gap; three researchers converging because their EXPERIMENTS agree is the answer, not a gap.
 3. **Evidence quality** — every hypothesis carries file:line citations? No "probably" / "might be" / "must be" without a pointer? No prose-only hypotheses?
 4. **Falsifiability** — every hypothesis names the observation that would refute it? A hypothesis without a falsification test is a guess.
 5. **Recent-change correlation** — has each draft consulted the `git log` window between the last-green run and the failure? An unconsulted recent-change window is a coverage gap.
 6. **Cross-team awareness** — for any hypothesis tagged `fix_scope_estimate: cross-team` or `architecture-level`, are the affected modules / contracts identified by `file:symbol`?
 7. **Test-author-error consideration** — has at least one researcher seriously considered that the expectation itself is wrong (the spec changed, the journey map drifted, the inventory selector renamed)? This category is the most-skipped and most-recurring miss.
+8. **Executed falsification** — was every hypothesis's falsification test actually RUN, with the command and verbatim captured output recorded and `status` set? A hypothesis whose falsification was only written down is a guess with a plan attached. The set converges ONLY when exactly one hypothesis survived execution and every competitor is executed-refuted or honestly `not-executable` with the missing input NAMED. A plan whose leading hypothesis is unexecuted is not converged, whatever its citation count.
 
 ### Verdict and loop
 
@@ -139,10 +146,10 @@ The architect writes a verdict file:
 
 Containing per-criterion `pass` / `gap` annotations and, if any criterion is `gap`, a directive back to specific researchers naming the gap and what they must extend their draft to cover. The orchestrator loops:
 
-1. If ALL seven criteria pass → proceed to Phase C.
-2. If ANY criterion is `gap` → re-dispatch the named researchers with the gap directive. Each re-dispatch is a fresh, focused pass on the gap — not a full re-research. The re-dispatched researcher updates its draft (`-v2`, `-v3` ...). Loop until ALL criteria pass.
+1. If ALL eight criteria pass → proceed to Phase C.
+2. If ANY criterion is `gap` → re-dispatch the named researchers with the gap directive — and when the gap is criterion 8, the directive names the EXPERIMENT to run, never a re-read to perform. Each re-dispatch is a fresh, focused pass on the gap — not a full re-research. The re-dispatched researcher updates its draft (`-v2`, `-v3` ...). Loop until ALL criteria pass.
 
-This loop runs until the architect converges — there is NO fixed cycle cap (per `common-pipeline-conventions` `## Unbounded solving discipline`). Each cycle that still shows gaps sends the named researchers back for a deeper pass; the loop continues until all seven criteria pass and the architect produces an approved diagnostic plan. If progress genuinely stalls because a critical input is missing that only the owner can supply (a stale CODEBASE_MAP that needs refreshing, an absent expectation file, a redacted log), the architect surfaces that specific required input to the owner via the orchestrator — loudly, while the rest of the run continues — and resumes the loop once it is provided. The loop never halts on cycle count; only a genuine missing-required-input pause (not exhaustion) interrupts it.
+Convergence means exactly one hypothesis survived executed falsification and every competitor is executed-refuted or honestly not-executable with its missing input named — a set that merely AGREES is not converged. This loop runs until the architect converges — there is NO fixed cycle cap (per `common-pipeline-conventions` `## Unbounded solving discipline` and `## No self-imposed limits discipline`). Each cycle that still shows gaps sends the named researchers back to execute the next falsification; the loop continues until all eight criteria pass and the architect produces an approved diagnostic plan. If progress genuinely stalls because a critical input is missing that only the owner can supply (a stale CODEBASE_MAP that needs refreshing, an absent expectation file, a redacted log), the architect surfaces that specific required input to the owner via the orchestrator — loudly, while the rest of the run continues — and resumes the loop once it is provided. The loop never halts on cycle count; only a genuine missing-required-input pause (not exhaustion) interrupts it.
 
 ## Phase C — Consolidated diagnostic plan
 
@@ -156,11 +163,19 @@ The plan has these required sections:
 
 1. **Failure summary** — one paragraph in product terms (what users experience), not implementation terms.
 2. **Code flow under suspicion** — the merged trace from the three researchers, deduplicated. Annotated with which hops are highest-leverage hypothesis candidates.
-3. **Ranked hypotheses (consolidated)** — merged + re-ranked from the three drafts. Each hypothesis carries: rank, candidate, category, evidence (citations from any of the three drafts), falsification_test, fix_scope_estimate, and which researcher(s) raised it. The architect's re-ranking can promote a hypothesis that any single researcher under-weighted but the cross-draft evidence supports.
+3. **Ranked hypotheses (consolidated)** — merged + re-ranked from the three drafts BY EXECUTED EVIDENCE. Each hypothesis carries: rank, candidate, category, evidence (citations from any of the three drafts), falsification_test, `falsification_executed`, `falsification_command`, `observed_output`, `status`, fix_scope_estimate, and which researcher(s) raised it. A survived hypothesis outranks any unexecuted one; an executed-refuted one ranks below everything still standing. The architect's re-ranking can promote a hypothesis that any single researcher under-weighted but the cross-draft EXECUTED evidence supports.
 4. **Recommended investigation order for the fix team** — which hypothesis to verify first, second, third. Each step names the verification action (run X test with Y data, capture Z log, query DB for W).
 5. **Fix-scope guidance** — which team(s) own the likely fix per the leading hypothesis. If `cross-team`, the named teams. If `architecture-level`, the architect flags this for a Phase 4 reconciliation-style design step before any code is touched.
 6. **Coverage-map impact** — every requirement in the coverage map that the leading hypothesis (and the runner-up) would invalidate if confirmed. The fix team's brief MUST list these as acceptance criteria.
-7. **Pre-fix verification checklist** — observations the fix team must capture BEFORE proposing a fix, so the proposed fix can be evaluated against actual evidence rather than the hypothesis. (e.g., "capture POST /api/auth/login response body when the matched account row has deleted_at set" / "log the value of feature_flag_v2 in the failing run".)
+7. **Pre-fix verification checklist** — re-confirmations of the researchers' captured observations against the live state, plus any observation only the fix team's own instrumentation can produce, captured BEFORE proposing a fix. (e.g., "re-capture POST /api/auth/login response body when the matched account row has deleted_at set" / "log the value of feature_flag_v2 in the failing run".) Because the researchers already EXECUTED the falsifications, this checklist is never the first time an experiment runs.
+
+**The machine-readable sidecar (v3.66.0).** Beside the markdown plan the architect writes `diagnostic-plan-<ts>.json` — `leading_hypothesis` (id, candidate, `falsification_executed`, `falsification_command`, `observed_output`, `status`), `competitors[]` (the same fields, plus `not_executable_reason` where `status: not-executable`), and `root_cause_claimed` (true ONLY when the leading hypothesis survived AND at least one competitor was executed-refuted). The architect then runs the 24th Layer-3 tool against it:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/hooks/vao_tools.py" verify-diagnosis-falsified --artifact "<cwd>/.architect-team/diagnostic-research/<test-id>/diagnostic-plan-<ts>.json" --out "<cwd>/.architect-team/vao-verdicts/<test-id>-diagnosis.json" || python "${CLAUDE_PLUGIN_ROOT}/hooks/vao_tools.py" verify-diagnosis-falsified --artifact "<cwd>/.architect-team/diagnostic-research/<test-id>/diagnostic-plan-<ts>.json" --out "<cwd>/.architect-team/vao-verdicts/<test-id>-diagnosis.json"
+```
+
+A non-zero exit (`diagnosis-leading-hypothesis-unexecuted` / `diagnosis-falsification-output-missing` / `diagnosis-leading-hypothesis-not-survived` / `diagnosis-competitor-unexecuted` / `diagnosis-root-cause-without-refuted-competitor` / `diagnosis-fewer-than-three-hypotheses`) means the plan is NOT final: the architect re-dispatches the researchers to run what is missing. The completion-audit arm `_audit_diagnosis_falsified` (`hooks/pipeline-completion-audit.py`) is the run-level backstop — an in-flight SR whose plan sidecar is missing or invalid is a BLOCKING worklist item (kill-switch `CT6_DIAGNOSIS_GATE_DISABLED`; resolved SRs are never retro-gated).
 
 The plan becomes a required input to the Phase 2 fix-team brief. The fix-team brief explicitly cites the plan's path; the fix team's first action is to read the plan in full.
 
@@ -190,6 +205,8 @@ The skill fires ONLY when the failure has escalated past the teammate's slice vi
 - The architect review is a gate, not a formality. If a gap exists, the loop continues — the fix team is NOT spawned with an unvetted plan.
 - The fix team starts every test-failure SR by reading the diagnostic plan in full and executing the pre-fix verification checklist BEFORE proposing any fix.
 - The fix team can re-trigger research if its evidence contradicts the plan; it cannot patch past the plan.
+- Every leading hypothesis is executed-survived and every competitor executed-refuted or honestly not-executable before Phase D. The sidecar records it, `verify-diagnosis-falsified` gates it, `_audit_diagnosis_falsified` backstops it.
+- No self-imposed limits: no round cap, budget, or time box on the research (`docs/ETHOS.md` principle 8); the only pause is a named missing input the owner alone holds.
 - All artifacts persist under `.architect-team/diagnostic-research/<test-id>/` — the audit trail must survive past the SR's resolution so master review (Phase 7) can walk the chain.
 
 ## Anti-patterns to reject
@@ -202,6 +219,8 @@ The skill fires ONLY when the failure has escalated past the teammate's slice vi
 | "We can let the fix team verify the plan during its own work." | The fix team is incentivized to confirm, not falsify. The researchers are incentivized to disagree. Reversing that order is how wrong fixes ship. |
 | "Architect review is slow; just consolidate the three drafts mechanically." | Mechanical consolidation produces a union of three drafts. The architect's value is rejecting drafts with gaps and forcing deeper passes. Skip the review and the plan is a least-common-denominator average rather than a robustness-vetted contract. |
 | "If all three researchers converge on the same hypothesis, skip the architect — convergence is the answer." | Convergence without divergence-considered is the failure mode the architect catches. Three researchers all picking product-bug because none considered test-author-error is a real risk; the architect's coverage check is what catches it. |
+| "I researched it and nobody concluded." | Not an outcome. An unconverged set means a falsification has not been RUN yet — run it. The only sanctioned pause names the specific input the owner alone holds; exhaustion and round counts are not inputs. |
+| "Ranking is by evidence weight, so the best-cited hypothesis leads." | Citations are reading. A hypothesis that survived an executed falsification outranks any unexecuted one, however well cited — and an unexecuted rank-1 is a plan that is not finished. |
 
 ## Where this skill plugs into the pipeline
 

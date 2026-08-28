@@ -139,7 +139,7 @@ def test_every_principles_bullet_names_exactly_one_anti_pattern(blocks_mod) -> N
     second anti-pattern naming to any bullet."""
     B = blocks_mod
     bullets = [ln for ln in B.PRINCIPLES.split("\n") if ln.startswith("- **")]
-    assert len(bullets) == 7, f"expected 7 principle bullets, found {len(bullets)}"
+    assert len(bullets) == 8, f"expected 8 principle bullets (v3.66.0 added Understand before acting), found {len(bullets)}"
     for bullet in bullets:
         assert bullet.count("Anti-pattern:") == 1, f"bullet names != 1 anti-pattern: {bullet!r}"
 

@@ -73,7 +73,22 @@ EXTRACTIONS = {
     #     which was already on disk, so no rule text was lost and nothing that
     #     cites the section by heading was disturbed. Making room by extraction
     #     is this regime's own mechanism; raising the cap would have defeated it.
-    "common-pipeline-conventions": ("auto-worktree-lifecycle", 259290, 259100),
+    #   v3.66.0 transition:   259100 -> 257358 (-1742 NET, cap still UNCHANGED)
+    #     ADDED `## Read this first` (the ranked binding rules, ~2.2 KB — the
+    #     instruction-load fix: the rules that matter stop being buried),
+    #     `## No self-imposed limits discipline (v3.66.0)` (~1.5 KB) and the
+    #     authoring-rules clarifier on `## Operating rules`, which together
+    #     took the file to 263699 — 4409 OVER the cap. PAID FOR by extracting
+    #     the v2.5.0 narrative of `## In-flight clarification discipline`
+    #     (failure shape, detection-signal table, fold procedure, anti-pattern
+    #     rationales, cancellation table, clarifications-log schema — ~9.7 KB,
+    #     orchestrator-only relevance that every agent was carrying) to
+    #     references/in-flight-clarification-discipline.md behind a STOP
+    #     pointer + a one-paragraph inline summary that keeps every phrase the
+    #     suite pins; `### Parallel lanes (v3.16.0)` stays INLINE verbatim
+    #     because tests/test_parallel_lane_inject.py pins its mechanics there.
+    #     Same mechanism as v3.63.0: extraction, not a raised cap.
+    "common-pipeline-conventions": ("auto-worktree-lifecycle", 259290, 257358),
 }
 
 # the STOP pointer's cited-path grammar: > **STOP.** ... Read `<path>` ...

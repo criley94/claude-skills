@@ -22,7 +22,7 @@ When your work is expected to exceed ~20 tool calls, write a checkpoint to `.arc
 
 ## Operating principles
 
-CT6 work is governed by seven load-bearing principles. The full statements — each with its named anti-pattern — live in `docs/ETHOS.md`; hold to them in every phase, and treat them as the tie-breakers when a call is unclear.
+CT6 work is governed by eight load-bearing principles. The full statements — each with its named anti-pattern — live in `docs/ETHOS.md`; hold to them in every phase, and treat them as the tie-breakers when a call is unclear.
 
 - **Reuse before build.** Extend or compose what exists before writing anything new; every new file earns a Reuse Decision. Anti-pattern: the greenfield reflex.
 - **The producer is never its own checker.** Every completion claim is verified by a different agent than the one that produced it. Anti-pattern: self-attestation.
@@ -31,6 +31,7 @@ CT6 work is governed by seven load-bearing principles. The full statements — e
 - **Default to action.** Gates are opt-in; on reversible work, pick the sensible default and proceed. Anti-pattern: permission-seeking.
 - **Documentation currency.** Docs ship current or the run does not ship. Anti-pattern: the stale grid.
 - **Evidence before assertion.** State a result only after running the check and reading its output. Grep proves presence, never absence; silence is not a finding; relay claims as claims, verdicts as facts; a green check is evidence for what it measures, never for what you asserted. Anti-pattern: the unverified "should work".
+- **Understand before acting.** Explore until you fully understand — no self-imposed turn count, budget, cycle cap, or time box, and none imposed on an agent you dispatch; the ONLY limits are the ones the user explicitly states. Anti-pattern: the self-rationed investigation.
 
 See `docs/ETHOS.md` for the full text.
 
@@ -60,13 +61,13 @@ Bash is for: `git log`, `git ls-files`, `wc -l`, directory listings, file-counts
 ## Process
 
 1. **Read all maps** (codebase, route if present, design if present).
-2. **Spot-check claims.** Sample ~10-15 claims at random and verify against the actual code:
+2. **Verify the claims.** Verify EVERY claim in your assigned partition of the map (the three reviewers split the map three ways; between them every claim is read against the actual code — sampling is not verification, per `docs/ETHOS.md` principle 8):
    - "Module `src/x/y.py` exports class `Y` with method `foo`" → read the file, confirm.
    - "Route `/dashboard` calls `GET /api/me`" → find the dashboard component, grep for the call.
    - "Entry point is `src/main.py`" → confirm that's actually invoked by the build / package.json scripts.
    - **(Design map only, if present)** "Asset `logo-primary` is `public/images/logo.svg` with SHA-256 `a3f1...`" → run `sha256sum public/images/logo.svg` (or `certutil -hashfile` on Windows) and confirm.
    - **(Design map only)** "Token `brand.primary.500` is `#2563EB`" → grep `tailwind.config.{js,ts}` / `theme.ts` / tokens file and confirm.
-3. **Look for omissions.** Walk the directory tree (`git ls-files | head -200`). For each top-level module, confirm it has at least one line in the codebase map. For each route file (if frontend), confirm an entry in ROUTE_MAP. **For each file in `public/images/` / `assets/` / `public/assets/` (if design map present), confirm an entry in the Asset Registry. For each design token in `tailwind.config.{js,ts}` / `tokens.json`, confirm a row in the Design Tokens tables.**
+3. **Look for omissions.** Walk the FULL directory tree (`git ls-files`, every path — never a truncated head). For each top-level module, confirm it has at least one line in the codebase map. For each route file (if frontend), confirm an entry in ROUTE_MAP. **For each file in `public/images/` / `assets/` / `public/assets/` (if design map present), confirm an entry in the Asset Registry. For each design token in `tailwind.config.{js,ts}` / `tokens.json`, confirm a row in the Design Tokens tables.**
 4. **Look for staleness.** `git log --since=<last_mapped> --name-only` — any files changed since the map's timestamp should ideally still be reflected. Flag files that appear in recent commits but not in either map. **For DESIGN_MAP, also check whether files under `$REQ_DIR/designs/` are newer than `last_designed`.**
 5. **Look for misclassification.** A file documented as "utility" that actually defines API routes is a deficiency.
 
@@ -110,4 +111,4 @@ See `common-pipeline-conventions/SKILL.md` `## Dynamic affordance discovery disc
 - No fixing the map. You review, you do not edit.
 - No consulting the other two reviewers. Independent verdicts only.
 - No vague deficiencies like "the map seems incomplete." Every deficiency cites `file:line` or `file:symbol` evidence.
-- No assuming claims are correct without spot-checking. Sample at least 10.
+- No assuming claims are correct without reading the code. Every claim in your partition — sampling is not verification.

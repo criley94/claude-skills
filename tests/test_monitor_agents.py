@@ -46,8 +46,13 @@ def test_watcher_documents_per_finding_json_contract() -> None:
 
 
 def test_watcher_documents_budget_enforcement() -> None:
+    """v3.66.0 — a budget applies ONLY when the user passes <budget-seconds>;
+    there is no default (inverted from the pre-v3.66.0 agent-chosen 1800s)."""
     body = WATCHER.read_text(encoding="utf-8")
-    assert "1800" in body or "30 minutes" in body
+    low = body.lower()
+    assert "1800" not in body and "30 minutes" not in low, "no agent-chosen default budget"
+    assert "no default budget" in low or "unbounded by default" in low
+    assert "budget-seconds" in low
     assert "budget-exceeded.json" in body
 
 

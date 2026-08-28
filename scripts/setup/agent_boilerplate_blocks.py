@@ -71,7 +71,7 @@ OPERATING_CONTEXT = '## Operating context (v1.0.0)\n\nPer `skills/team-spawning-
 # block is the compact, always-loaded reminder that points there.
 PRINCIPLES = (
     "## Operating principles\n\n"
-    "CT6 work is governed by seven load-bearing principles. The full statements — "
+    "CT6 work is governed by eight load-bearing principles. The full statements — "
     "each with its named anti-pattern — live in `docs/ETHOS.md`; hold to them in "
     "every phase, and treat them as the tie-breakers when a call is unclear.\n\n"
     "- **Reuse before build.** Extend or compose what exists before writing anything "
@@ -89,7 +89,11 @@ PRINCIPLES = (
     "- **Evidence before assertion.** State a result only after running the check and "
     "reading its output. Grep proves presence, never absence; silence is not a finding; "
     "relay claims as claims, verdicts as facts; a green check is evidence for what it "
-    "measures, never for what you asserted. Anti-pattern: the unverified \"should work\".\n\n"
+    "measures, never for what you asserted. Anti-pattern: the unverified \"should work\".\n"
+    "- **Understand before acting.** Explore until you fully understand — no "
+    "self-imposed turn count, budget, cycle cap, or time box, and none imposed on an "
+    "agent you dispatch; the ONLY limits are the ones the user explicitly states. "
+    "Anti-pattern: the self-rationed investigation.\n\n"
     "See `docs/ETHOS.md` for the full text."
 )
 

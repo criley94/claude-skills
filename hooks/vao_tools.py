@@ -42,7 +42,7 @@ _REEXPORT_MAP = {
     'core': ('_utc_now_iso', '_write_verdict', '_is_test_path', '_looks_like_test_path', '_scan_markers', '_ITEM_DISPOSITION_CITATIONS', '_is_enumerated_line', '_boundary_pattern', '_first_token_present',),
     'oracle': ('_normalize_tree', '_walk_divergences', 'verify_oracle_match', '_count_leaves', 'verify_every_element', '_parent_path', 'verify_rendered_parity', '_resolved_target', 'verify_interactions_honored',),
     'fake_data': ('_FAKE_DATA_PATTERNS', 'verify_no_fake_data', '_MOCK_STATE_SIGNATURES', '_ASYNC_STATE_UI_HINTS', '_detect_mock_state_residue', '_detect_live_response_not_rendered', '_detect_mock_fallback_uncovered', '_detect_network_not_intercepted', '_detect_async_status_not_surfaced', '_detect_shared_mock_source_not_swept', 'verify_live_data_wiring',),
-    'live_verification': ('_EMPTY_REGION_COORD_THRESHOLD', '_EMPTY_REGION_SELECTORS', '_DEMO_MATTER_MARKERS', '_is_empty_region_click', '_detect_self_verification_loop', '_detect_prefill_masking', '_EXTERNAL_SYSTEM_FEATURE_KINDS', '_FORBIDDEN_PROXY_ASSERTION_FIELDS', '_detect_external_state_not_asserted', '_detect_missing_evidence_artifact', 'verify_live_verification_claim', '_PROXY_SUBSTITUTION_MARKERS', '_UNREACHABLE_STATE_MARKERS', '_REACHABILITY_NOT_REACHED_VALUES', '_normalize_selector', '_selectors_match', '_semantic_labels_match', '_detect_proxy_element_substituted', '_detect_unreachable_state_not_escalated', '_detect_semantic_target_mismatch', '_detect_proxy_substitution_markers_in_text', 'verify_target_element_measured', '_LOCAL_ENV_HOST_PATTERNS',),
+    'live_verification': ('_EMPTY_REGION_COORD_THRESHOLD', '_EMPTY_REGION_SELECTORS', '_DEMO_MATTER_MARKERS', '_is_empty_region_click', '_detect_self_verification_loop', '_detect_prefill_masking', '_EXTERNAL_SYSTEM_FEATURE_KINDS', '_FORBIDDEN_PROXY_ASSERTION_FIELDS', '_detect_external_state_not_asserted', '_detect_missing_evidence_artifact', 'verify_live_verification_claim', '_PROXY_SUBSTITUTION_MARKERS', '_UNREACHABLE_STATE_MARKERS', '_REACHABILITY_NOT_REACHED_VALUES', '_normalize_selector', '_selectors_match', '_semantic_labels_match', '_detect_proxy_element_substituted', '_detect_unreachable_state_not_escalated', '_detect_semantic_target_mismatch', '_detect_proxy_substitution_markers_in_text', '_detect_stuck_without_verification_plan', 'verify_target_element_measured', '_LOCAL_ENV_HOST_PATTERNS',),
     'persona': ('_LOADING_STATE_UI_HINTS', '_DOUBLE_SUBMIT_TIMING_THRESHOLD_MS', '_LOADING_STATE_MAX_DELAY_MS', '_matches_loading_hint', '_detect_persona_path_not_tested', '_detect_cross_persona_sync_not_asserted', '_detect_double_submit_not_tested', '_detect_loading_state_not_asserted', 'verify_per_persona_path_coverage', '_is_local_env_url', '_detect_live_dev_environment_not_tested', '_FILE_UPLOAD_AFFORDANCE_SIGNATURES', '_AFFORDANCE_SIGNATURES', '_scan_file_content', '_detect_affordance_not_addressed', 'verify_affordance_coverage',),
     'scope': ('_FULL_BUILD_MANDATE_PHRASES', '_HONEST_SCOPE_STATEMENT_MARKERS', '_FOUNDATION_ONLY_FRAMING_MARKERS', '_MILESTONE_DEFERRAL_PATTERNS', '_detect_honest_scope_statement_emitted', '_detect_foundation_only_framing', '_detect_unilateral_implementation_scope_cut', 'verify_no_implementation_scope_cut', 'verify_no_unilateral_override',),
     'deferral': ('_STANDING_RED_MARKERS', '_CROSS_LAYER_SR_ORIGIN_KINDS', '_detect_standing_red_committed', '_detect_cross_layer_fix_not_routed', 'verify_no_standing_red', '_DEFERRAL_CATALOG_MARKERS', '_FOLLOWUP_QUESTION_MARKERS', '_detect_deferred_work_catalog', '_detect_followup_decision_question', '_detect_wrap_up_with_known_bugs', 'verify_no_end_of_run_deferral',),
@@ -55,6 +55,7 @@ _REEXPORT_MAP = {
     'check_integrity': ('_ACCEPTED_RED_SOURCES', '_ZERO_WORK_SIGNATURES', '_FAILURE_SIGNATURES', '_command_names_runner', '_tsc_uses_build_mode', '_playwright_zero_total', '_is_solution_shaped_tsconfig', '_tsc_solution_shape', '_resolve_cited_path', '_detect_missing_cited_output', '_read_output_text', '_scan_zero_work', '_output_shows_failure', 'verify_check_can_fail',),
     'frontend_e2e': ('_E2E_USER_ACTION_RE', '_E2E_USER_LOCATOR_RE', '_E2E_API_ACTION_RE', '_E2E_VISIBLE_STATE_RE', '_e2e_action_text', '_e2e_is_user_driven_action', '_e2e_is_visible_state_assertion', '_e2e_resolve_trace', 'verify_frontend_e2e_loop_exit',),
     'claim_binding': ('_ACCEPTED_WITNESS_KINDS', '_TREE_SCOPE_MARKERS', '_ABSENCE_ASSERTION_MARKERS', '_is_absence_assertion', '_path_under_any', '_test_ids_intersect', '_output_names_cited_test', '_claim_is_tree_scoped', 'verify_claim_instrument_binding',),
+    'diagnosis': ('verify_diagnosis_falsified',),
 }
 
 
@@ -249,6 +250,10 @@ def main(argv: list[str] | None = None) -> int:
     cib.add_argument("--repo-root", default=None, help="Optional base for resolving relative cited paths (defaults to the artifact's repo_root field).")
     cib.add_argument("--out", required=True, help="Path to write the verdict JSON.")
 
+    dxf = sub.add_parser("verify-diagnosis-falsified")
+    dxf.add_argument("--artifact", required=True, help="Path to the diagnostic-plan SIDECAR JSON with leading_hypothesis{} + competitors[] + root_cause_claimed.")
+    dxf.add_argument("--out", required=True, help="Path to write the verdict JSON.")
+
     args = parser.parse_args(argv)
 
     if args.tool == "verify-oracle-match":
@@ -405,6 +410,12 @@ def main(argv: list[str] | None = None) -> int:
         verdict = verify_frontend_e2e_loop_exit(
             verification_artifact=_load_json(args.artifact),
             repo_root=args.repo_root,
+            out_path=args.out,
+        )
+        ok = verdict["valid"]
+    elif args.tool == "verify-diagnosis-falsified":
+        verdict = verify_diagnosis_falsified(
+            plan_sidecar=_load_json(args.artifact),
             out_path=args.out,
         )
         ok = verdict["valid"]

@@ -400,7 +400,7 @@ ENFORCE_ZERO_COMPLIANCE_FINDINGS = True
 
 def test_engine_runs_over_the_real_in_scope_set() -> None:
     result = ic.assess_instruction_files(REPO_ROOT)
-    # 55 SKILL.md + 39 agents + 26 commands + CLAUDE.md + 2 maps = 123. Ledger —
+    # 56 SKILL.md + 39 agents + 26 commands + CLAUDE.md + 2 maps = 124. Ledger —
     # APPEND transitions, never rewrite (the v3.59.3 lesson):
     #   119 -> 120  Run D data-annotations: the new data-annotations skill (its
     #               engine is scripts/-tier, out of scope).
@@ -409,7 +409,10 @@ def test_engine_runs_over_the_real_in_scope_set() -> None:
     #               +1 command (playwright-suite). Both engine packages
     #               (scripts/intuition_lifecycle/, scripts/playwright_suite/)
     #               are scripts/-tier and so add nothing here.
-    assert result["files_checked"] == 123, result["files_checked"]
+    #   123 -> 124  v3.66.0 executed-diagnosis + verification-planning: +1 skill
+    #               (verification-planning). The 24th Layer-3 tool
+    #               (hooks/vao/diagnosis.py) is hooks/-tier and adds nothing here.
+    assert result["files_checked"] == 124, result["files_checked"]
     assert isinstance(result["findings"], list)
 
 

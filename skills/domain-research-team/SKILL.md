@@ -93,7 +93,7 @@ Each researcher's job:
 
 ## Phase R3 — Round-robin convergence
 
-Each researcher reads the other two's drafts and writes a `delta.json` describing what they agree with, what they disagree with, and what new evidence they bring. After one round of deltas, each researcher writes a `final.json`.
+Each researcher reads the other two's drafts and writes a `delta.json` describing what they agree with, what they disagree with, and what new evidence they bring. Deltas continue round over round until the three agree; only then does each researcher write a `final.json` (no round count ends it — `docs/ETHOS.md` principle 8).
 
 Convergence check before exiting:
 - All 3 researchers' `final.json` agree on every `persona_id`.
@@ -107,7 +107,7 @@ Failures iterate via `ralph-loop:ralph-loop` in the canonical flag form `/ralph-
 Dispatch the `master-synthesizer` agent (existing, opus). Inputs: every researcher's `final.json`. The synthesizer:
 
 1. Merges the 3 maps into a single authoritative one.
-2. For every `persona_id` where the 3 researchers disagreed even after Round 2, the synthesizer escalates to the orchestrator (which surfaces to the user via `AskUserQuestion`).
+2. For every `persona_id` where the disagreement is genuinely owner-only — the researchers' evidence is exhausted and the remaining question is a product decision only the user can make, never a round count — the synthesizer escalates to the orchestrator (which surfaces to the user via `AskUserQuestion`).
 3. Writes the final map to the caller-configured `output_path`. The map's frontmatter records:
    - `last_synthesized`: ISO 8601 UTC
    - `output_kind`: matching the caller's request

@@ -76,7 +76,17 @@ def test_skill_cross_references_canonical_home() -> None:
     assert "v3.3.0" in body
 
 
-def test_skill_documents_budget_default() -> None:
+def test_skill_documents_no_default_budget() -> None:
+    """v3.66.0 — inverted from the pre-v3.66.0 '30-minute default budget' pin.
+
+    The watcher is UNBOUNDED by default and honors only a budget the USER
+    passes (`<budget-seconds>`); a self-imposed default budget is the
+    self-rationed investigation ETHOS principle 8 forbids."""
     body = SKILL.read_text(encoding="utf-8")
-    assert "budget" in body.lower()
-    assert "30 minutes" in body or "1800" in body
+    low = body.lower()
+    assert "budget" in low
+    assert "no default budget" in low, "the skill must state there is NO default budget"
+    assert "budget-seconds" in body, "the user's budget lever must be named"
+    assert "30 minutes" not in body and "1800" not in body, (
+        "no default budget value may be documented (v3.66.0 no-self-imposed-limits)"
+    )

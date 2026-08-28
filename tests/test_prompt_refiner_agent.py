@@ -119,11 +119,15 @@ def test_three_question_forms(plugin_root: Path) -> None:
 
 
 def test_question_cap_is_five(plugin_root: Path) -> None:
-    """The 2-5 questions-per-iteration cap is documented."""
+    """v3.66.0 — questions are BATCHED (~5 per message for the user's benefit);
+    every open question is asked across successive messages — a batch size is
+    pacing, never a cap on what gets asked (inverted from the pre-v3.66.0
+    'cap at 5 questions per iteration')."""
     _, body = _read(plugin_root)
     body_lower = body.lower()
-    assert "5 question" in body_lower or "5 questions" in body_lower or "cap at 5" in body_lower, (
-        "agent must declare the 2-5 questions-per-iteration cap"
+    assert "5 question" in body_lower or "5 questions" in body_lower
+    assert "batch" in body_lower and "never a cap" in body_lower, (
+        "agent must frame the 5-question batch as pacing, never a cap"
     )
 
 

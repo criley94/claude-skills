@@ -92,7 +92,7 @@ Dispatch `test-run-watcher` (sonnet, color teal) with the bound source spec + ad
 
    `preliminary_category` is set by the watcher to `"unknown"` — the synthesizer is responsible for the 4-category classification.
 
-3. **Honor budgets:** the watcher has a maximum runtime budget of 30 minutes by default; longer runs require explicit user authorization. Beyond budget, the watcher writes a `budget-exceeded.json` marker + exits cleanly. The synthesizer treats this as a `partial` report (still produced, with the partial flag set).
+3. **Honor the user's budget — and only the user's:** there is no default budget; the watcher is unbounded by default and runs until the source completes (`docs/ETHOS.md` principle 8). When the user passed `<budget-seconds>`, crossing it writes a `budget-exceeded.json` marker + exits cleanly and the synthesizer produces a `partial` report (partial flag set).
 
 4. **Return verdict:** the watcher returns `{run_id, finding_count, captured_until, budget_status}` to the monitor orchestrator.
 

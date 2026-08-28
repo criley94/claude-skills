@@ -102,10 +102,16 @@ def test_letter_grade_mapping_documented(plugin_root: Path) -> None:
 
 
 def test_iteration_ceiling_is_five(plugin_root: Path) -> None:
-    """The refinement loop is bounded at 5 iterations — the documented ceiling."""
+    """v3.66.0 — the refinement loop is UNBOUNDED by default; the only cap is the
+    user's explicit `--max-iterations`. (Inverted from the pre-v3.66.0 'documented
+    5-iteration ceiling' — a self-imposed limit the user never stated.)"""
     _, body = _read(plugin_root)
-    assert "5 iteration" in body.lower() or "iteration ceiling" in body.lower(), (
-        "skill must document the 5-iteration ceiling"
+    low = body.lower()
+    assert "iteration ceiling" not in low and "5 iterations completed" not in low, (
+        "the self-imposed 5-iteration ceiling must be gone"
+    )
+    assert "--max-iterations" in body and ("unbounded" in low or "no iteration cap" in low), (
+        "skill must state the loop is unbounded by default with --max-iterations as the user's lever"
     )
 
 
