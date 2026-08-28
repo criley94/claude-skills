@@ -260,6 +260,8 @@ Each journey becomes a Phase B test. Inventory IDs not referenced by any journey
 
 ## Phase B — Test authoring (informed by the inventory AND the user-journey map)
 
+**Choose the venue before authoring against it (v3.66.0).** Apply the `verification-planning` skill first: enumerate local run / dev environment / replay / seeded fixture / production for the claims these flows verify, prove which venue each depends on, and record the `verification_plan`. The real-backend rule below stands — for a `both`-layer feature the deployed dev environment IS the faithful venue for front-to-back claims, and the plan records why; the cheaper venues still settle first every claim they can (the handler logic locally, the failing input by replay, the empty-state by a seeded fixture), and a live environment the flows need is the run's to PROVIDE (`references/local-dev-test-discipline.md`), never a reason to wait.
+
 **Tests are organized by user journey, not by inventory entry.** Each entry in `journeys[]` becomes a top-level test whose name reflects the user achievement, not the widget being clicked. For each journey AND each entry in `conditional_ui`, author a Playwright test. Mandates:
 
 ### Test naming reflects user intent

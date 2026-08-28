@@ -74,9 +74,15 @@ def test_phase_b6b_documents_bounded_recursion(plugin_root: Path) -> None:
     start = body.find("## Phase B6b")
     next_h2 = body.find("\n## ", start + 1)
     section = body[start:next_h2] if next_h2 > 0 else body[start:]
-    # 3 consecutive fix-regression bugs escalates
-    assert "3 consecutive" in section or "3-cycle" in section.lower() or "bounded" in section.lower(), (
-        "Phase B6b must document the bounded-recursion rule for fix-regression"
+    # v3.66.0 — the fix-regression counter is an OBSERVABILITY signal; oscillation
+    # continues from a different angle and never escalates on count (inverted from
+    # the pre-v3.66.0 '3 consecutive escalates' self-imposed limit).
+    low = section.lower()
+    assert "3 consecutive" not in low and "bounded recursion at" not in low and "bounded at" not in low, (
+        "Phase B6b must not cap the fix-regression loop on a count"
+    )
+    assert "observability" in low or "different angle" in low, (
+        "Phase B6b must frame the fix-regression counter as observability with a different-angle continuation"
     )
 
 

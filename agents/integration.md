@@ -22,7 +22,7 @@ When your work is expected to exceed ~20 tool calls, write a checkpoint to `.arc
 
 ## Operating principles
 
-CT6 work is governed by seven load-bearing principles. The full statements — each with its named anti-pattern — live in `docs/ETHOS.md`; hold to them in every phase, and treat them as the tie-breakers when a call is unclear.
+CT6 work is governed by eight load-bearing principles. The full statements — each with its named anti-pattern — live in `docs/ETHOS.md`; hold to them in every phase, and treat them as the tie-breakers when a call is unclear.
 
 - **Reuse before build.** Extend or compose what exists before writing anything new; every new file earns a Reuse Decision. Anti-pattern: the greenfield reflex.
 - **The producer is never its own checker.** Every completion claim is verified by a different agent than the one that produced it. Anti-pattern: self-attestation.
@@ -31,6 +31,7 @@ CT6 work is governed by seven load-bearing principles. The full statements — e
 - **Default to action.** Gates are opt-in; on reversible work, pick the sensible default and proceed. Anti-pattern: permission-seeking.
 - **Documentation currency.** Docs ship current or the run does not ship. Anti-pattern: the stale grid.
 - **Evidence before assertion.** State a result only after running the check and reading its output. Grep proves presence, never absence; silence is not a finding; relay claims as claims, verdicts as facts; a green check is evidence for what it measures, never for what you asserted. Anti-pattern: the unverified "should work".
+- **Understand before acting.** Explore until you fully understand — no self-imposed turn count, budget, cycle cap, or time box, and none imposed on an agent you dispatch; the ONLY limits are the ones the user explicitly states. Anti-pattern: the self-rationed investigation.
 
 See `docs/ETHOS.md` for the full text.
 
@@ -90,7 +91,7 @@ Before declaring Phase 5 complete, run `visual-fidelity-reconciliation` across E
 
 Run `visual-fidelity-reconciliation` Phase A.0 FIRST: if the design Oracle itself moved (a baseline migration — `design_baseline` changed), every screen is in scope and any screen whose implementation has NOT been migrated is drifted by definition. A "UNCHANGED Full→V2"-style classification during a migration is a guaranteed-drift signal, never a skip.
 
-1. For each frontend codebase with a `DESIGN_MAP.md`, run the full reconciliation (Phase 0 → Phase E in the skill). **Phase 0 is a hard precondition: the live app must be running** (real backend, per the v0.9.5 discipline). If it cannot run, you do NOT substitute static analysis — escalate `blocked`.
+1. For each frontend codebase with a `DESIGN_MAP.md`, run the full reconciliation (Phase 0 → Phase E in the skill). **Phase 0 is a hard precondition: the live app must be running** (real backend, per the v0.9.5 discipline). If it is not running, that is YOUR job to fix, not a blocker to report: per `verification-planning` and `skills/common-pipeline-conventions/references/local-dev-test-discipline.md`, enumerate the venues, bring the local dev server up or run `prod_deploy.deploy_command`, seed the state the screens need through the application's own create path, and run the reconciliation. Static analysis is never a substitute for the live render that this gate mandates — but a live render you PROVIDE is the answer, and `blocked` is reserved for a genuine external blocker (a credential the run does not have, a deploy only a human may authorise), reported with the `verification_plan` that shows every venue you tried.
 2. Code-first (Phase B) AND a render of the LIVE app (Phase C) — never skip either, and never skip a screen. Every (screen, state, viewport) tuple gets a live screenshot; a verdict with no live screenshot did not happen.
 3. Per-state element screenshots + per-viewport full-page screenshots are evidence; they go into the Phase 5 report.
 4. **For any drift / gap, fix to spec by default** per Phase E's decision matrix:

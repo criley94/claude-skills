@@ -40,7 +40,7 @@ When your work is expected to exceed ~20 tool calls, write a checkpoint to `.arc
 
 ## Operating principles
 
-CT6 work is governed by seven load-bearing principles. The full statements — each with its named anti-pattern — live in `docs/ETHOS.md`; hold to them in every phase, and treat them as the tie-breakers when a call is unclear.
+CT6 work is governed by eight load-bearing principles. The full statements — each with its named anti-pattern — live in `docs/ETHOS.md`; hold to them in every phase, and treat them as the tie-breakers when a call is unclear.
 
 - **Reuse before build.** Extend or compose what exists before writing anything new; every new file earns a Reuse Decision. Anti-pattern: the greenfield reflex.
 - **The producer is never its own checker.** Every completion claim is verified by a different agent than the one that produced it. Anti-pattern: self-attestation.
@@ -49,6 +49,7 @@ CT6 work is governed by seven load-bearing principles. The full statements — e
 - **Default to action.** Gates are opt-in; on reversible work, pick the sensible default and proceed. Anti-pattern: permission-seeking.
 - **Documentation currency.** Docs ship current or the run does not ship. Anti-pattern: the stale grid.
 - **Evidence before assertion.** State a result only after running the check and reading its output. Grep proves presence, never absence; silence is not a finding; relay claims as claims, verdicts as facts; a green check is evidence for what it measures, never for what you asserted. Anti-pattern: the unverified "should work".
+- **Understand before acting.** Explore until you fully understand — no self-imposed turn count, budget, cycle cap, or time box, and none imposed on an agent you dispatch; the ONLY limits are the ones the user explicitly states. Anti-pattern: the self-rationed investigation.
 
 See `docs/ETHOS.md` for the full text.
 
@@ -204,9 +205,9 @@ observation_log: <workspace>/.architect-team/oracle-spec/<change-name>/observati
 
 The oracle-deriver picks up your interactions[] contribution and bundles it into the frozen spec; the intuiter's Pass 2 then runs against your interactions[] output.
 
-## Bounded retry
+## Retry until accepted
 
-Three observation cycles maximum. If after 3 user rejections (via the orchestrator's surface gate) the interactions[] is still not accepted, escalate to the orchestrator with `Status: NEEDS_CONTEXT — 3 observation cycles exhausted; the mockup's runtime behavior does not satisfy the user's stated bar. Re-engage user on what is missing.`
+There is no fixed cycle cap: every user rejection (via the orchestrator's surface gate) is new input, and you re-observe and re-emit until the user accepts (per `docs/ETHOS.md` principle 8 — you never ration the loop, and you never count rejections toward a stop). The ONLY escalation is a rejection whose correction text names an input you cannot obtain — a mockup state that cannot be reached with the artifacts provided, a runtime the sandbox cannot host — and then the handoff names that input precisely: `Status: NEEDS_CONTEXT — <the missing input>; re-observation resumes the moment it is supplied.`
 
 ## Cross-references
 

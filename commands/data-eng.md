@@ -131,7 +131,7 @@ After binding `$REQ_DIR` and BEFORE invoking the `data-eng-pipeline` skill, dete
   - `$REQ_DIR` resolves to an existing directory on disk.
   - `$REQ_DIR` resolves to a markdown file with `refined-by: proposal-refiner` frontmatter.
   - The `--no-refine` flag was passed.
-- **Run refinement** otherwise. Set `$REFINER_MODE = "pipeline"` and invoke the `proposal-refiner` skill from this plugin (use the Skill tool with `skill: proposal-refiner`) passing `$REQ_DIR` (the verbatim data-engineering prose) as the input. The skill runs phases R1 → R6 — codebase-map loading, multi-axis grading, conversational refinement (5-iteration ceiling), and final markdown output.
+- **Run refinement** otherwise. Set `$REFINER_MODE = "pipeline"` and invoke the `proposal-refiner` skill from this plugin (use the Skill tool with `skill: proposal-refiner`) passing `$REQ_DIR` (the verbatim data-engineering prose) as the input. The skill runs phases R1 → R6 — codebase-map loading, multi-axis grading, conversational refinement (unbounded by default; `--max-iterations` is the user's lever), and final markdown output.
 
 After `proposal-refiner` exits in pipeline mode, **rebind `$REQ_DIR` to the absolute path of the refined-prompt markdown file**. The lane's Phase D−1 intake then operates on the refined brief.
 

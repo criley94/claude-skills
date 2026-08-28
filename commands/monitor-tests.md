@@ -120,7 +120,7 @@ After the skill returns, print:
 
 - Strictly passive. The command never modifies source files, never injects inbox messages, never files SRs, never gates any other pipeline.
 - Read-only on the codebase. Write-only to `<workspace>/.architect-team/monitor-runs/<run-id>/`.
-- Budget-bounded. Default 30-minute watcher budget; longer runs require explicit user authorization.
+- Budget only by the user. No default watcher budget; pass `<budget-seconds>` to set one explicitly.
 - Best-effort. A missing prerequisite (CI token unset / APM URL unresolvable / log file missing) produces a one-line note + clean exit, not a hard failure.
 
 ## Cross-references

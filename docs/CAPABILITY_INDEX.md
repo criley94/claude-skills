@@ -10,7 +10,7 @@ Every capability CLAUDE TEAM SIX ships, one line each, derived from the `name` +
 generated, never hand-edited — after adding or renaming any skill, command,
 or agent, regenerate it with `python3 scripts/docs_tooling/capability_index.py --write`.
 
-## Skills (55)
+## Skills (56)
 
 - **api-design-from-frontend** — Extracts the "backend logic from frontend" portion (Stages 5+6+7) of visual-to-api-design as a standalone reusable skill
 - **architect-team-pipeline** — Use when a feature needs to be driven end-to-end to tested, integrated, demonstrable production code
@@ -62,6 +62,7 @@ or agent, regenerate it with `python3 scripts/docs_tooling/capability_index.py -
 - **test-run-monitor** — A passive observer team that watches when testing is happening and produces a per-run report
 - **token-compression** — Use to reduce the token cost of agents' INTERNAL communication — inter-agent messages, scratch notes, internal reasoning summaries — by …
 - **ux-test-builder** — A persona-driven UX-test orchestrator
+- **verification-planning** — Use BEFORE verifying any claim — a fix, a feature, a deploy, a diagnosis — to choose HOW to verify it
 - **verified-agent-output** — The Verified Agent Output (VAO) framework — six layers of machine-mediated verification of agent claims
 - **visual-fidelity-reconciliation** — Use when QA-reviewing frontend work post-development against a codebase that has a DESIGN_MAP.md — any commit touching frontend files …
 - **visual-to-api-design** — Use when the architect-team is invoked against a visual codebase (UI present, requirements absent OR partially specified) and must DERIVE …

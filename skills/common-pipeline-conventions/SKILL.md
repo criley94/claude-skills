@@ -5,9 +5,9 @@ description: "Use as the canonical home for cross-cutting conventions shared by 
 
 # Common Pipeline Conventions
 
-The three pipeline skills (`architect-team-pipeline`, `bug-fix-pipeline`, `mini-architect-team-pipeline`) share four cross-cutting disciplines. Without a canonical home, each pipeline re-explained the rule in its own body — three places to update on every change, three places to drift. This skill is the single source of truth. Each pipeline body references the section it needs and stays slim.
+The three pipeline skills (`architect-team-pipeline`, `bug-fix-pipeline`, `mini-architect-team-pipeline`) share a growing set of cross-cutting disciplines (this file is the canonical home for every one of them — the founding four below and the 40+ added since; the RANKED binding set is the `Read this first` section). Without a canonical home, each pipeline re-explained the rule in its own body — three places to update on every change, three places to drift. This skill is the single source of truth. Each pipeline body references the section it needs and stays slim.
 
-The four conventions:
+The founding conventions (procedure; the behavioral rules that bind every agent are ranked in the `Read this first` section):
 
 1. **Cross-platform Python invocation** — every plugin-script call uses the polyglot `python3 X || python X` pattern so the same invocation works on Linux / macOS and on default Windows python.org installs.
 2. **Dispatch mode selection (v1.0.0)** — teams vs subagents, decided once at pipeline entry, persisted to `intake-state.json`, with the teams-mode and subagents-mode dispatch primitives spelled out.
@@ -17,7 +17,7 @@ The four conventions:
 <!-- ct6:block:principles:begin -->
 ## Operating principles
 
-CT6 work is governed by seven load-bearing principles. The full statements — each with its named anti-pattern — live in `docs/ETHOS.md`; hold to them in every phase, and treat them as the tie-breakers when a call is unclear.
+CT6 work is governed by eight load-bearing principles. The full statements — each with its named anti-pattern — live in `docs/ETHOS.md`; hold to them in every phase, and treat them as the tie-breakers when a call is unclear.
 
 - **Reuse before build.** Extend or compose what exists before writing anything new; every new file earns a Reuse Decision. Anti-pattern: the greenfield reflex.
 - **The producer is never its own checker.** Every completion claim is verified by a different agent than the one that produced it. Anti-pattern: self-attestation.
@@ -26,9 +26,31 @@ CT6 work is governed by seven load-bearing principles. The full statements — e
 - **Default to action.** Gates are opt-in; on reversible work, pick the sensible default and proceed. Anti-pattern: permission-seeking.
 - **Documentation currency.** Docs ship current or the run does not ship. Anti-pattern: the stale grid.
 - **Evidence before assertion.** State a result only after running the check and reading its output. Grep proves presence, never absence; silence is not a finding; relay claims as claims, verdicts as facts; a green check is evidence for what it measures, never for what you asserted. Anti-pattern: the unverified "should work".
+- **Understand before acting.** Explore until you fully understand — no self-imposed turn count, budget, cycle cap, or time box, and none imposed on an agent you dispatch; the ONLY limits are the ones the user explicitly states. Anti-pattern: the self-rationed investigation.
 
 See `docs/ETHOS.md` for the full text.
 <!-- ct6:block:principles:end -->
+
+## Read this first — the binding behavioral rules, in priority order (v3.66.0)
+
+This file carries 50+ disciplines. These are the ones that bind every agent on every turn, RANKED — when two rules seem to conflict, the higher one wins. Each points at its canonical section; everything else in this file is procedure for carrying these out, read on demand from its STOP pointer, never from memory.
+
+1. **Evidence before assertion** — state a result only after running the check and reading its output; a cause is a hypothesis until it survives an executed falsification (`docs/ETHOS.md` principle 7 + its section "A cause is a hypothesis until it survives an executed falsification").
+2. **No self-imposed limits** — explore until you fully understand; no self-imposed turn count, budget, cycle cap, or time box; only the user sets a limit, explicitly (the "No self-imposed limits discipline" section below; `docs/ETHOS.md` principle 8).
+3. **Unbounded solving** — loop until the gate is green; the only pause is a named missing input the owner alone holds (the "Unbounded solving discipline" section).
+4. **Verification is a choice, not a lookup** — before verifying, enumerate local run / dev environment / replay / seeded fixture / production, pick the cheapest faithful venue, and record the plan (the `verification-planning` skill); a gate that needs a live environment obliges the run to PROVIDE one, never to ask (`references/local-dev-test-discipline.md`).
+5. **The producer is never its own checker** (`team-spawning-and-review-gates`; `docs/ETHOS.md` principle 2).
+6. **Honest boundary; relay claims as claims, verdicts as facts** (`docs/ETHOS.md` principle 3 + its "Evidence integrity" section).
+7. **Fidelity to human-configured policy** — never edit, disable, or skip a human's configuration (the "Deploy mandate discipline" section; `hooks/deploy_config.py`).
+8. **Scope discipline** — never silently narrow the prompt (the "Scope discipline" section).
+9. **Teammate git discipline** — no destructive git operations (the "Teammate git discipline" section).
+10. **Documentation currency** — docs ship current or the run does not ship (`documentation-currency`).
+
+## No self-imposed limits discipline (v3.66.0)
+
+An agent explores until it fully understands the problem, and it never rations that understanding. Concretely, no agent may impose on its own work — or on any agent it dispatches — a **turn** count, a token or cost **budget**, a **cycle** or round cap, a **time** box, a sampling cap standing in for a full walk, or a "good enough after N" cutoff. The only limits are the ones the user explicitly states — "spend only X", "only do this much", a `--max-iterations` the user passed, a `<budget-seconds>` the user passed — and a limit the user did not state is not a limit. Exhaustion, impatience, and the urge to summarise are not stopping conditions. The one sanctioned pause is a NAMED missing input that only the owner can supply, and it pauses only that thread while everything else continues.
+
+Corollaries, so the rule is not misread: a bounded retry of an EXTERNAL flaky resource (a rate-limit backoff, a lock retry, the 2-attempt harness-truncation resume) is mechanics, not a limit on understanding; a write-scope bound ("Write only to `<path>`") is not a limit; a spawn-recursion depth bound is not a limit; a user-invoked flag (`--proposal-first`, `--max-iterations`, `<budget-seconds>`) is the user's limit and is honoured exactly. `tests/test_no_self_imposed_limits.py` sweeps `agents/`, `skills/`, `commands/` and `docs/ETHOS.md` for the forbidden shapes and forbids their return; `docs/ETHOS.md` principle 8 names the anti-pattern — *the self-rationed investigation*.
 
 ## Cross-platform Python invocation (polyglot pattern)
 
@@ -633,53 +655,9 @@ The tool does not parse the artifact's contents in v2.4.0; presence + non-emptin
 
 ## In-flight clarification discipline (v2.5.0)
 
-A user-reported gap: when the architect-team pipeline is mid-run (Phase −2 → 8 still executing), the orchestrator may receive a user message that doesn't explicitly invoke `/architect-team`. Without v2.5.0, the orchestrator may treat the injected message as a SEPARATE task and try to "solve" it outside the pipeline — bypassing every discipline.
+> **STOP.** Before reacting to ANY user message that arrives while a pipeline is in-flight, Read `skills/common-pipeline-conventions/references/in-flight-clarification-discipline.md` and execute it in full. Do not work from memory.
 
-**Failure shape** (verbatim case in CHANGELOG v2.5.0): when the user gives instructions mid-run WITHOUT a direct `/architect-team` reference, the agent must still fold them into the pipeline — *"it should always reference the architect team and use that skill as long as we are in the middle of a run … not try to sovle outside of that"*. Concrete example: `/architect-team build the dashboard` starts the pipeline, then the user types *"wait, also include a CSV export button"* between turns — that clarification folds into the in-flight run, it does not spawn a sibling solve.
-
-The orchestrator, mid-execution, sees a user message that doesn't start with `/architect-team`. The wrong reactions:
-- Open a file and start implementing CSV export directly (bypassing Phase 0 normalization, Phase 1 validation, Phase 2 team spawn, Phase 3 review gates, Phase 8 doc-currency + commit).
-- Treat the message as a question and answer it conversationally.
-- Spawn a fresh `/architect-team` invocation as a sibling run, splitting state across two coverage maps + two openspec changes + two commit ranges.
-- Silently ignore the message and proceed to the next phase action.
-
-The right reaction: **fold the clarification into the IN-FLIGHT run's brief, re-evaluate the in-flight phase, continue executing the pipeline.**
-
-### Symmetry with v2.0.0 Layer 6
-
-v2.0.0 Layer 6 (`hooks/skill_invocation_audit.py`) catches: user typed `/architect-team:X` AND orchestrator applied methodology by hand. v2.5.0 catches the INVERSE: user did NOT type `/architect-team` AND a pipeline is in-flight AND orchestrator treats message as a new standalone task. Together they close both directions of "the agent should not operate outside the framework."
-
-### The 3 detection signals — any one means "pipeline in-flight"
-
-| Signal | Path | Meaning |
-|---|---|---|
-| **Intake state with phase incomplete** | `<workspace>/.architect-team/intake-state.json` | File exists AND either `completed_at` is null OR `phase` field is < 8 OR the latest run's `status` is `in_progress`. |
-| **Escalation marker** | `<workspace>/.architect-team/escalation-pending.md` | The pipeline is paused waiting for user input (per the existing escalation discipline). |
-| **Unresolved teammate manifests** | `<workspace>/.architect-team/teammates/*.json` with no matching `reviews/<task-id>.json` | At least one dispatched teammate has not yet returned its review-gate evidence. |
-
-When ANY of these holds, the pipeline is in-flight. The signals are intentionally permissive — a false-positive (treat a fresh standalone request as a clarification → orchestrator surfaces "is this part of the in-flight run?" via `AskUserQuestion`) costs one user message; a false-negative (treat a real clarification as a new task → bypass the pipeline) is the failure mode this discipline exists to close.
-
-### The rule
-
-When the pipeline is in-flight AND the user's most recent message:
-1. Does NOT explicitly cancel/stop the run (see cancellation channel below), AND
-2. Is prose — a clarification, scope amendment, correction, redirect, "wait, also...", "actually...", "make sure to also...", etc.
-
-THEN the orchestrator MUST:
-
-1. **Append** the message verbatim to `<workspace>/.architect-team/clarifications/<run-id>-<ts>.md` (a per-run clarifications log; create the directory if absent).
-2. **Re-evaluate** the in-flight phase against the amended brief:
-   - If the clarification adds detail within existing scope → `clarification`: fold into the next phase's inputs without restarting prior phases.
-   - If the clarification materially shifts scope → `scope-amendment`: re-run Phase 0 → 1 with the amended brief; preserve already-completed teammate work where it remains valid; surface scope-conflict to the user via `AskUserQuestion` if the amendment would invalidate work already done.
-   - If the message is a SEPARABLE, independent problem that does not depend on the in-flight work and touches a DISJOINT file scope → `parallel-problem`: open a sanctioned concurrent in-run **lane** for it (a dedicated background team holding a disjoint file-scope lock) that works ALONGSIDE the existing team(s) — do NOT serialize it behind the current flow, and do NOT spawn a sibling `/architect-team` run. See `### Parallel lanes (v3.16.0)` below.
-3. **Continue** the pipeline run — the orchestrator does NOT spawn a separate `/architect-team` workflow (a fragmenting sibling). A `parallel-problem` lane is NOT a sibling: it shares THIS run's coverage map / openspec change / commit range and converges via Phase 4.
-
-### The 4 forbidden anti-patterns
-
-- **solve-with-tools-directly.** Opening a file and editing it because the user said "fix the typo"; running `npm test` because the user said "also make sure tests pass" — all forbidden mid-run. The pipeline IS the framework; mid-run actions outside the framework bypass it.
-- **answer-conversationally.** The user is not asking for explanation; they are amending the brief. Conversation-style replies leave the in-flight pipeline in an undefined state — the user's amendment is on-record but the pipeline's state doesn't reflect it.
-- **spawn-sibling-invocation.** Calling `Skill(architect-team)` as a SEPARATE new run because the user added scope. Two independent runs split state across two coverage maps + two openspec changes + two commit ranges — the user's intent (one coherent dev iteration) is structurally lost. This remains FORBIDDEN. **NOTE (v3.16.0):** a sanctioned in-run **parallel lane** is NOT this anti-pattern — it does not re-invoke `Skill(architect-team)`, it shares the ONE run's coverage map / openspec change / commit range, it holds a disjoint file-scope lock, and it converges via Phase 4. The dividing line is: fragmenting a second RUN (forbidden) vs. opening a concurrent LANE inside the one run (allowed — see `### Parallel lanes (v3.16.0)`).
-- **silently-ignore.** Typing a single-sentence acknowledgment ("noted, I'll come back to that") and going back to the phase action. The orchestrator is not free to defer; the discipline says append + re-evaluate NOW, before the next phase action.
+The rule in one paragraph (the failure shape, the detection-signal table, the fold procedure, the anti-pattern rationales, the cancellation table and the clarifications-log schema are in the reference file): a pipeline is **in-flight** when ANY of the 3 detection signals holds — `<workspace>/.architect-team/intake-state.json` present with `completed_at` null / `phase` < 8 / status `in_progress`; `<workspace>/.architect-team/escalation-pending.md` present; or an unresolved `<workspace>/.architect-team/teammates/*.json` manifest with no matching `reviews/<task-id>.json`. A user message that arrives then and does NOT explicitly cancel the run is an amendment to THIS run: the orchestrator MUST **append** it verbatim to `<workspace>/.architect-team/clarifications/<run-id>-<ts>.md`, **re-evaluate** the in-flight phase (`clarification` → fold into the next phase's inputs; `scope-amendment` → re-run Phase 0 → 1 with the amended brief; `parallel-problem` → open a sanctioned in-run lane per `### Parallel lanes (v3.16.0)` below), and **continue** the run. The 4 forbidden anti-patterns — **solve-with-tools-directly**, **answer-conversationally**, **spawn-sibling-invocation**, **silently-ignore** — each act outside the pipeline and bypass every discipline; a sanctioned in-run lane is NOT a sibling and is NOT this anti-pattern. The ONLY mid-run release is the cancellation channel: an explicit `/architect-team cancel` / `/architect-team stop` / `/architect-team:cancel` / `/architect-team:stop`, a new explicit `/architect-team:<other-command>`, or plain-prose "cancel the run" / "stop the pipeline" / "abort"; the default leans heavily toward "fold into pipeline" — ambiguous prose is a clarification, not a cancel. Symmetric with v2.0.0 Layer 6 (`hooks/skill_invocation_audit.py`, which catches the inverse case): together they close both directions of "the agent should not operate outside the framework."
 
 ### Parallel lanes (v3.16.0)
 
@@ -699,44 +677,6 @@ The v2.5.0 dispositions above (`clarification` / `scope-amendment`) FOLD an inje
 **Honest harness constraint — do NOT overclaim.** The Lead is a single model-driven agent; there is no async push/listener thread that wakes the orchestrator the instant a message lands. "Responsive" here means: dispatch in the background so the Lead is not blocked, and poll the inbox aggressively on every wake/return so the message is drained at the next opportunity — typically the next dispatch boundary, not an interrupt. A message injected while the Lead is mid-tool-call is serviced when that call returns, not preemptively. The win is real (background + every-wake polling drains in seconds-to-one-dispatch instead of waiting a whole phase), but it is polling, not preemption.
 
 **Dispatch-mode caveat (v3.16.0).** Background lanes + every-wake polling are **teams-mode** primitives — `run_in_background: true` is what frees the Lead's turn (see `## Dispatch mode`). In the **subagents-mode fallback** the harness blocks the Lead's turn until each dispatch RETURNS, so a lane CANNOT run truly concurrently: it degrades to SEQUENTIAL (queued behind the current dispatch) and the every-wake poll collapses to the phase-boundary poll. The classification + disjoint-lock + Phase-4 convergence machinery still applies; only the concurrency degrades. The orchestrator knows which mode is active from `intake-state.json::dispatch_mode` and must not promise concurrency it cannot deliver in subagents mode.
-
-### Cancellation channel — the ONLY mid-run release
-
-The pipeline releases when the user EXPLICITLY says one of:
-
-| Channel | Examples |
-|---|---|
-| **Explicit cancel command** | `/architect-team cancel`, `/architect-team stop`, `/architect-team:cancel`, `/architect-team:stop` |
-| **New explicit Skill-invocation request** | `/architect-team:<other-command>` — recognized via v2.0.0 Layer 6's slash + prose regex |
-| **Plain prose cancellation** | "cancel the run", "stop the pipeline", "abort", "kill this run", "abandon this", "wrong direction, start over" |
-
-The default leans heavily toward "fold into pipeline." Ambiguous prose ("wait, hold on, I had a different idea") is more often a clarification than a cancel. The cost of a false-fold-when-cancel-was-intended is one more user message ("no, I really mean cancel"). The cost of a false-cancel-when-fold-was-intended is the destruction of in-progress teammate work + the current openspec change + intermediate commits.
-
-### The clarifications log
-
-Per-run mid-run clarifications are appended to `<workspace>/.architect-team/clarifications/<run-id>-<ts>.md`. Schema is intentionally informal in v2.5.0:
-
-```markdown
-# Clarification log — <run-id>
-
-## <ISO 8601 timestamp> — Phase <N>
-
-<verbatim user message>
-
-**Folded into:** <next phase action / scope amendment / etc.>
-```
-
-The log is read at run completion and the final report references each clarification. v2.5.x can formalize this into JSON.
-
-### Cross-references
-
-- `hooks/skill_invocation_audit.py` — v2.0.0 Layer 6 (catches the inverse case: user invoked but agent didn't).
-- `tests/test_in_flight_clarification_discipline.py` — structural tests for this canonical section + the cross-references in 3 pipeline bodies + the architect-team Skill body + 3 slash command bodies.
-- `skills/architect-team-pipeline/SKILL.md` `## Default mode of operation` — cross-reference to this discipline.
-- `skills/bug-fix-pipeline/SKILL.md` — cross-reference.
-- `skills/mini-architect-team-pipeline/SKILL.md` — cross-reference.
-- `commands/architect-team.md` (entry-point Skill body) — cross-reference.
-- `commands/architect-team.md`, `commands/bug-fix.md`, `commands/mini.md` — slash command body cross-references.
 
 ## Live-data wiring discipline (v2.6.0)
 
@@ -2088,7 +2028,7 @@ Every mapping / exploration / review-convergence loop uses EXACTLY this form:
 /ralph-loop "<prompt>" --completion-promise "<EXIT STRING>"
 ```
 
-Loop-**until-promise**: there is **NO `--max-iterations`** flag and no iteration cap anywhere in the pipeline — consistent with `## Unbounded solving discipline (v3.8.0)`. The loop ends ONLY when an agent emits the literal `<EXIT STRING>` completion-promise (e.g., `CODEBASE MAP COMPLETE` / a 3-reviewer total-agreement string). The agent emitting the exact promise string is the sole exit condition; a numeric cap would re-introduce the give-up ceiling that v3.8.0 removed.
+Loop-**until-promise**: there is no iteration cap — no AGENT-chosen cap exists anywhere in the pipeline; the only cap is a `--max-iterations` the USER passes explicitly (the `proposal-refiner` lever) — consistent with `## Unbounded solving discipline (v3.8.0)`. The loop ends ONLY when an agent emits the literal `<EXIT STRING>` completion-promise (e.g., `CODEBASE MAP COMPLETE` / a 3-reviewer total-agreement string). The agent emitting the exact promise string is the sole exit condition; a numeric cap would re-introduce the give-up ceiling that v3.8.0 removed.
 
 Also acceptable, naming the SAME mechanism, is the skill form `ralph-loop:ralph-loop` (invoked via the Skill tool) — the slash command `/ralph-loop` and the `ralph-loop:ralph-loop` skill are two surfaces of one loop primitive. Either is uniform; both carry the completion-promise and neither carries an iteration cap.
 
@@ -2333,6 +2273,8 @@ NO new Layer 3 tool — enforcement is the schema v7 optional field (hook-blocke
 
 ## Operating rules (non-negotiable)
 
+> These are AUTHORING rules for maintaining this file. The behavioral rules that bind every agent at run time are ranked in the "Read this first" section at the top of this file — read those; these govern how this file is edited.
+
 - A change to any of the four conventions edits this skill ONCE. The pipeline skills' references stay one-line; the rule update propagates by reference.
 - A pipeline skill MUST NOT re-explain any of the four conventions inline — replace it with a reference to this skill. Inline re-explanation is the drift-risk this skill exists to remove.
 - A pipeline skill's per-phase notifier invocations (the actual `notify.py phase_start --phase "Phase 2 — ..."` calls at each phase boundary) STAY in the pipeline body — those are per-phase content, not cross-cutting. The per-phase invocations follow the polyglot pattern from this skill's `## Cross-platform Python invocation` section.
@@ -2346,3 +2288,4 @@ Heavy, rarely-fired procedure detail lives in this skill's `references/` folder 
 | Section | Reference file | Loaded |
 | --- | --- | --- |
 | `## Auto-worktree lifecycle` | `skills/common-pipeline-conventions/references/auto-worktree-lifecycle.md` | on demand |
+| `In-flight clarification discipline (v2.5.0)` (all but `### Parallel lanes (v3.16.0)`, which stays inline) | `skills/common-pipeline-conventions/references/in-flight-clarification-discipline.md` | on demand |

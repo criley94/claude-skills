@@ -61,6 +61,7 @@ EXPECTED_SKILLS: set[str] = {
     "claude-design-import",
     "intuition-map-lifecycle",
     "playwright-suite-builder",
+    "verification-planning",
 }
 
 REQUIRED_FRONTMATTER_KEYS = {"name", "description"}

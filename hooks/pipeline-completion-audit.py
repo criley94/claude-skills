@@ -237,6 +237,8 @@ except ImportError:  # pragma: no cover - bare-module fallbacks
 # v3.55.0 — the frontend-E2E loop-exit kill-switch (operator escape if the gate
 # ever misfires). Same truthiness rule as the other CT6 kill-switches.
 FRONTEND_E2E_GATE_DISABLE_ENV = "CT6_FRONTEND_E2E_GATE_DISABLED"
+# v3.66.0 — the executed-diagnosis arm's own kill-switch (same truthy rule).
+DIAGNOSIS_GATE_DISABLE_ENV = "CT6_DIAGNOSIS_GATE_DISABLED"
 
 # v3.56.0 — the COMPLETION-LOCK substrate (hooks/open_work.py): the harness task
 # list, the durably-accumulated ask-ledger, the turn-output classifier and the
@@ -1800,6 +1802,97 @@ def _audit_release_backing(root: Path, at: Path) -> list[str]:
     ]
 
 
+def _diagnosis_gate_disabled() -> bool:
+    """True when CT6_DIAGNOSIS_GATE_DISABLED is set truthy (the shared CT6
+    kill-switch rule: anything but unset / 0 / false / no)."""
+    v = os.environ.get(DIAGNOSIS_GATE_DISABLE_ENV, "").strip().lower()
+    return v not in ("", "0", "false", "no")
+
+
+def _audit_diagnosis_falsified(root: Path, at: Path) -> list[str]:
+    """v3.66.0 — an in-flight SR whose diagnostic plan was theorized rather than
+    tested is a BLOCKING worklist item.
+
+    For every ``SR-*.json`` still ``open`` / ``in_progress`` that carries a
+    ``diagnostic_plan_path``, the arm REQUIRES the plan's executed-falsification
+    SIDECAR (``diagnostic_plan_sidecar`` when the SR names one, else the plan
+    path with a ``.json`` suffix) to exist AND to pass the 24th Layer-3 tool
+    ``verify_diagnosis_falsified`` — the leading hypothesis executed and
+    survived, every competitor executed-refuted or honestly not-executable with
+    its missing input named. This is the diagnosis-side twin of the
+    replication arm's ``artifact_executed`` rule: "did you run the repro?" was
+    unfakeable while "did you run the falsification?" was a prose field, and
+    the field symptoms ("nobody concluded" / "I was wrong, it was never X")
+    lived in that gap.
+
+    Fail-open in three directions: the kill-switch set, the tool unimportable,
+    or no in-flight SR with a plan. Resolved SRs are NEVER retro-gated — a plan
+    that already shipped its fix is not this run's to re-litigate (the v3.57.0
+    run-scoping lesson)."""
+    violations: list[str] = []
+    if _diagnosis_gate_disabled():
+        return violations
+    sr_dir = at / "solution-requirements"
+    if not sr_dir.is_dir():
+        return violations
+    try:
+        try:
+            from hooks.vao.diagnosis import verify_diagnosis_falsified as _verify
+        except ImportError:
+            try:
+                from vao.diagnosis import verify_diagnosis_falsified as _verify  # type: ignore[no-redef]
+            except ImportError:
+                from diagnosis import verify_diagnosis_falsified as _verify  # type: ignore[no-redef]
+    except ImportError:
+        return violations  # tool unavailable — fail open, never fail-closed-on-absence
+    for sr_path in sorted(sr_dir.glob("SR-*.json")):
+        sr = _load_json(sr_path)
+        if not isinstance(sr, dict):
+            continue
+        status = sr.get("status")
+        if status not in ("open", "in_progress"):
+            continue
+        plan = sr.get("diagnostic_plan_path")
+        if not plan:
+            continue  # the SR arm already names a missing plan for test-failure origins
+        plan_path = Path(str(plan))
+        if not plan_path.is_absolute():
+            plan_path = at.parent / plan_path
+        named_sidecar = sr.get("diagnostic_plan_sidecar")
+        sidecar = Path(str(named_sidecar)) if named_sidecar else plan_path.with_suffix(".json")
+        if not sidecar.is_absolute():
+            sidecar = at.parent / sidecar
+        if not sidecar.exists():
+            violations.append(
+                f"{sr_path.name} is '{status}' with a diagnostic plan whose "
+                f"executed-falsification sidecar is missing — write {sidecar} "
+                "(leading_hypothesis + competitors[] each with falsification_executed / "
+                "falsification_command / observed_output / status, and "
+                "root_cause_claimed) per diagnostic-research-team Phase C, then run "
+                "verify-diagnosis-falsified on it. A plan without executed "
+                "falsification is a ranked guess, not a diagnosis "
+                f"(kill-switch {DIAGNOSIS_GATE_DISABLE_ENV})."
+            )
+            continue
+        data = _load_json(sidecar)
+        if not isinstance(data, dict):
+            violations.append(
+                f"{sr_path.name}: diagnostic plan sidecar {sidecar.name} is unreadable / invalid JSON"
+            )
+            continue
+        verdict = _verify(data)
+        if not verdict.get("valid"):
+            sevs = sorted({str(g.get("severity", "?")) for g in verdict.get("gaps", []) if isinstance(g, dict)})
+            violations.append(
+                f"{sr_path.name}: diagnostic plan sidecar {sidecar.name} fails "
+                f"verify-diagnosis-falsified ({', '.join(sevs)}) — run the missing "
+                "falsifications (or name the input the owner alone holds) and "
+                "re-verify; the fix team is not dispatched on an unfalsified plan "
+                f"(kill-switch {DIAGNOSIS_GATE_DISABLE_ENV})."
+            )
+    return violations
+
+
 def audit(root: Path) -> tuple[bool, list[str]]:
     """Audit a workspace. Returns (is_real_run, violations)."""
     at = root / ".architect-team"
@@ -1820,6 +1913,7 @@ def audit(root: Path) -> tuple[bool, list[str]]:
     violations += _audit_manifest_id_hygiene(at)
     violations += _audit_frontend_e2e(root, at)
     violations += _audit_release_backing(root, at)
+    violations += _audit_diagnosis_falsified(root, at)
     return True, violations
 
 

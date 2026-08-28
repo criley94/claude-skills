@@ -148,12 +148,14 @@ witness CT6 already captures during replication.
   three levels down marks the endpoint's trace stale and triggers a targeted
   re-trace of the affected subtree, under the Phase 8 `documentation-currency`
   gate.
-- **Cost ceiling (REQ-DOC-08):** every trace runs under a hard token/time budget.
-  On exhaustion the tree is depth-truncated with explicit `truncated: true`
-  markers — use `truncate_to_budget(node_ids, MERMAID_MAX_NODES)` which returns
-  `(kept, truncated_flag)` and *marks* truncation rather than dropping silently.
-  Mermaid renders are node/depth-capped (`MERMAID_MAX_NODES` /
-  `MERMAID_MAX_DEPTH`).
+- **Rendering cap, not a trace budget (REQ-DOC-08):** the trace itself
+  runs to completion — every reachable hop is followed and lands in the
+  `lineage-graph.json` sidecar, with no token or time budget the agent sets
+  itself (`docs/ETHOS.md` principle 8). Only the MERMAID RENDERING of that
+  complete graph is node/depth-capped for readability (`MERMAID_MAX_NODES` /
+  `MERMAID_MAX_DEPTH`) — use `truncate_to_budget(node_ids, MERMAID_MAX_NODES)`,
+  which returns `(kept, truncated_flag)` and *marks* the rendering truncation
+  (`truncated: true`) rather than dropping silently; the sidecar stays whole.
 
 ## Identity nomenclature (REQ-MEM-02) — the load-bearing join key
 

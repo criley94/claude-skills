@@ -15,7 +15,7 @@
           ██    ██      ██   ██ ██  ██  ██           ██ ██  ██ ██
           ██    ███████ ██   ██ ██      ██      ███████ ██ ██   ██
 
-                        ─── C T 6 ───   v 3 . 65 . 0
+                        ─── C T 6 ───   v 3 . 66 . 0
 ```
 
 > **CLAUDE TEAM SIX (CT6)** — spec-to-production multi-agent coding pipeline
@@ -36,9 +36,9 @@
 > `/architect-team`, `/architect-team:bug-fix`, `/architect-team:mini`,
 > `/architect-team:inject`). CLAUDE TEAM SIX is the user-facing name.
 
-![version](https://img.shields.io/badge/version-3.65.0-2563EB?style=flat-square)
+![version](https://img.shields.io/badge/version-3.66.0-2563EB?style=flat-square)
 ![license](https://img.shields.io/badge/license-MIT-3FB950?style=flat-square)
-![tests](https://img.shields.io/badge/tests-8205%20passing-3FB950?style=flat-square)
+![tests](https://img.shields.io/badge/tests-8275%20passing-3FB950?style=flat-square)
 ![claude code](https://img.shields.io/badge/Claude%20Code-plugin-7C3AED?style=flat-square)
 
 ```
@@ -77,19 +77,19 @@ the current release's spotlight, below.
 
 ```
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-█▓▒░  ◆  NEW IN v3.65.0  ◆  ░▒▓█
+█▓▒░  ◆  NEW IN v3.66.0  ◆  ░▒▓█
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ```
 
-### v3.65.0 — playwright-suite-intuition-lifecycle: a lifecycle for the intuition map, a durable registry for the Playwright suite
+### v3.66.0 — executed-diagnosis-and-no-limits: a cause is a hypothesis until it survives an executed falsification
 
-Three verified gaps drove it: `INTERACTION_INTUITION_MAP.md` existed only when a pipeline's Phase −1D happened to produce it — and `playwright-user-flows` never read it; nothing grew the map from user-specified flows or debugging discoveries; and the Playwright suite had no durable registry — no inventory, no whole-suite run at full integration, no dev/prod safety split.
+Two field symptoms drove it: the pipeline offering *"I need to wait before deploying to prod"* as a verification plan when cheaper faithful venues existed, and diagnoses that read like conclusions — *"I researched it and nobody concluded"*, *"I was wrong, it was never X"* — and turned out to be guesses. Reviewing the prompts and the architecture found three structural causes, all closed without dispatching the pipeline (the pipeline was the surface under repair).
 
-**The map becomes a guaranteed, growing asset.** The new `intuition-map-lifecycle` skill gives every lane three verbs: **ensure** (absent → produce it; presence alone does not satisfy — a freshly scaffolded zero-element map reports `populate`, never `none`), **grow** (a user-specified flow upserts as confirmed — the user specifying the flow IS the confirmation; a contradiction with a confirmed entry leaves it byte-identical and asks a targeted question quoting both readings), and **bug-path-upsert** (debugging discoveries land with `regression_refs[]` naming the tests that pin them). Stdlib engine, additive schema, CRLF-preserving byte-fidelity rewrites.
+**Diagnosis now executes.** The diagnostic researchers were read-only, the architect was forbidden to pick a cause, the review loop capped itself at three rounds and ended in "cannot converge", and Phase B3 emailed the top-ranked guess as the root cause. Now every falsification test the researcher writes is RUN, hypotheses rank by executed evidence, the architect's review has no cycle cap, and a root-cause claim must carry an executed falsification or be labeled a hypothesis. Enforced, not requested: the 24th Layer-3 tool `verify-diagnosis-falsified` reads the architect's `diagnostic-plan-<ts>.json` sidecar, and the new Stop-hook arm `_audit_diagnosis_falsified` holds the run open until it validates.
 
-**The suite becomes a durable artifact.** The new `playwright-suite-builder` skill + `/architect-team:playwright-suite` command drive P0–P9: inventory reconciled against a committed `suite-manifest.json`, existing-test review through the standing verification gates (never duplicated), suite-wide gap analysis and gap-fill per the full authoring discipline, debug-flow registration, persona grouping into Playwright `dev`/`prod` projects, and default-deny production safety — a mutating test enters the prod project only through a fully-authorized exception (nine adversary bypass manifests refused through the real CLI). The 7th pipeline-driving skill, registered everywhere a run-driving lane must be.
+**"Where to verify" becomes a decision.** The new `verification-planning` skill makes every verification an enumerate-and-choose step — local run, dev, replay, seeded fixture, production — proving which venue each claim depends on, running the cheapest faithful one first, and recording the plan. A `cannot-verify-without-deploy` verdict with no such plan is now a measured gap (`stuck-without-verification-plan`), and providing the venue is the run's job.
 
-**Full integration runs the whole suite.** Phase 5 and `dev-api-integration-testing` enumerate the manifest and run the ENTIRE dev suite; `mini-review-sweep` gains the full-suite gate while mini itself stays narrow; `ux-test` and `bug-fix` grow the map and register flows as they work. Eight thin pin-tested hooks; an absent manifest changes nothing — the named migration boundary.
+**No self-imposed limits.** ETHOS principle 8, *Understand before acting*, is compiled into all 39 agents: explore until you fully understand — no self-imposed turn count, budget, cycle cap, or time box, and none imposed on a dispatched agent; the only limits are the ones the user explicitly states. Thirteen sites across the corpus that rationed themselves were inverted, and a sweep test keeps the class from returning. The conventions file gains a ranked *Read this first* section so the rules that matter stop being buried.
 
 Full detail in [`CHANGELOG.md`](CHANGELOG.md) and [`docs/RELEASE_HISTORY.md`](docs/RELEASE_HISTORY.md).
 
@@ -100,7 +100,7 @@ Full detail in [`CHANGELOG.md`](CHANGELOG.md) and [`docs/RELEASE_HISTORY.md`](do
 ```
 
 ```
-┌─ SKILLS (55) ───────────────────────┬─ AGENTS (39) ─────────────────────────┐
+┌─ SKILLS (56) ───────────────────────┬─ AGENTS (39) ─────────────────────────┐
 │ ◇ architect-team-pipeline           │ ◆ system-architect (fable)            │
 │ ◇ intake-and-mapping                │ ◆ frontend (fable)                    │
 │ ◇ reuse-first-design                │ ◆ backend (fable)                     │
@@ -166,6 +166,7 @@ Full detail in [`CHANGELOG.md`](CHANGELOG.md) and [`docs/RELEASE_HISTORY.md`](do
 │ ◇ intuition-map-lifecycle (v3.65.0) │                                       │
 │ ◇ playwright-suite-builder          │                                       │
 │   (v3.65.0 — P0–P9 suite lane)      │                                       │
+│ ◇ verification-planning (v3.66.0)   │                                       │
 ├─ COMMANDS (26) ─────────────────────┴───────────────────────────────────────┤
 │ ▸ /architect-team <path-to-requirements-folder | free-text prompt>          │
 │ ▸ /architect-team:architect-team-setup                                      │
@@ -1245,7 +1246,7 @@ escalates to the human.
 python -m pytest -v
 ```
 
-Tests validate: plugin/marketplace JSON; all 55 skill frontmatters; all 39 agent frontmatters (tool + model names); all 26 commands; the v3.31.0 instruction-compliance lint (`tests/test_instruction_compliance.py` — the deterministic engine's enforced zero-findings gate across all 123 in-scope instruction files, plus the uniform 1024-char raw-description cap for agents + commands); hooks.json wiring for all eight trigger events (PreToolUse + PostToolUse + SubagentStop + Stop + the v1.0.0 TaskCompleted + TeammateIdle + the v3.18.0 PreCompact + the v3.30.0 SessionStart); hook script logic (review-gate + teammate-idle share one `review_evidence_schema` module — evidence schema v7: 17 self-review fields + the independent `task-reviewer` verdict; the `pretool_unilateral_override_guard` PreToolUse hook; the `pipeline-completion-audit` Stop hook incl. the master-review audit check and the v3.56.0 completion lock — its placement above every agent-written release path, the four kill-switches, teammate owner-scoping, and the block-vs-fail-open split of the `hooks/open_work.py` substrate, plus the v3.64.0 abandonment discrimination (inherited-stale tasks surface, never block; the retire surface refuses live tasks without --force); path-traversal sanitization); cross-component consistency (the two evidence hooks cannot drift; the Stop hook's origin set matches the pipeline; no unregistered skills/agents/commands); the setup + MemPalace install scripts; the `scripts/notify/notify.py` notifier (config load/validate, Gmail + SendGrid message construction with mocked transport, event dispatch, secret resolution, CLI + failure isolation) and its pipeline wiring; the v1.0.0 teams-mode detection helper (`scripts/setup/teams_mode.py`) + the cross-session lock layer (`hooks/locks.py`); the v1.1.0 worktree-aware state-resolution helper (`scripts/setup/worktree_paths.py`) including the cross-worktree lock-coordination integration test (acquire from a real `git worktree add`-created worktree blocks an intersecting acquire from main with the default `locks_dir`); the v1.2.0+v1.3.0+v3.6.0 worktree-lifecycle helper (`scripts/setup/worktree_lifecycle.py`) including `create_run_worktree` (now at the v3.6.0 hidden per-project container layout `<parent>/.<repo>-worktrees/<slug>/`) + collision handling, `current_worktree_is_run` True / False detection, `current_run_slug` extraction, `cleanup_run_worktree` with + without branch removal, the v1.3.0 auto-cleanup helpers (`list_merged_architect_team_worktrees` with `exclude_current` safeguard; `cleanup_merged_worktrees` with `dry_run` preview; end-to-end cleanup-only-removes-merged), and the v3.6.0 `finalize_run_worktree` end-of-run merge check (remove-when-merged / warn-when-unmerged / no-op-on-non-run-branch) + dual-layout (old-flat + new-container) slug derivation & sweep, and the v3.7.0 auto-merge-to-main helpers (`list_run_branches` per-branch merged / cleanly-mergeable status excluding non-architect-team branches; `merge_branch_to_main_and_prune` clean-merge→push→delete-branch→remove-worktree with conflict-abort-changes-nothing and never-`--force` safety)) — all exercising real `git init` + `git worktree add` fixtures with no git mocks; and the no-arbitrary-timers, diagnostic-research, MemPalace-integration, integration-testing, expensive-verification, editability-completeness, readme-styling, design-baseline-migration, visual-verification-team, producer-checker-enforcement, mempalace-mine-syntax, documentation-currency, project-email-notifications, ui-interaction-fidelity, email-testing, proposal-refiner, ux-test-builder, bug-fix-pipeline, code-path-witness, mini-architect-team-pipeline, agent-teams-mode, scope-discipline (v1.4.0 — `tests/test_scope_discipline.py` audits the canonical `## Scope discipline` section in `common-pipeline-conventions/SKILL.md`, the 6 parity-implying verbs documented in the section + the bug-classifier action-verb section, the 3 pipeline body references, the prompt-refiner 6th `scope-fidelity` axis + grade-schema, the proposal-refiner Phase R2 documentation of the axis + new weights, and the system-architect Master Review Audit + Phase 2 architect brief scope-narrowing checks), and playwright-suite-intuition-lifecycle (v3.65.0 — the `intuition-map-lifecycle` ensure/grow/bug-path-upsert engine, the `suite-manifest.json` schema engine + `verify-suite-manifest` with default-deny prod safety, the 8 thin lane hooks, and the run-driving registry additions — 4 new test files) disciplines. **8205 tests pass (+ 6 skipped, 0 failed, across 259 top-level test files — disk-anchored via `git ls-files 'tests/test_*.py'`; measured on Windows/win32 at v3.65.0, the first win32-recorded bracket since the counting doctrine landed, recorded under `docs/measurements/` as the release's closing act; the win32/darwin skip-profile difference is real — the prior v3.64.0 darwin basis reported 16 skips, 14 PyYAML-gated + 2 archived-coverage-map, and a PyYAML-present host reports fewer).**
+Tests validate: plugin/marketplace JSON; all 56 skill frontmatters; all 39 agent frontmatters (tool + model names); all 26 commands; the v3.31.0 instruction-compliance lint (`tests/test_instruction_compliance.py` — the deterministic engine's enforced zero-findings gate across all 124 in-scope instruction files, plus the uniform 1024-char raw-description cap for agents + commands); hooks.json wiring for all eight trigger events (PreToolUse + PostToolUse + SubagentStop + Stop + the v1.0.0 TaskCompleted + TeammateIdle + the v3.18.0 PreCompact + the v3.30.0 SessionStart); hook script logic (review-gate + teammate-idle share one `review_evidence_schema` module — evidence schema v7: 17 self-review fields + the independent `task-reviewer` verdict; the `pretool_unilateral_override_guard` PreToolUse hook; the `pipeline-completion-audit` Stop hook incl. the master-review audit check and the v3.56.0 completion lock — its placement above every agent-written release path, the four kill-switches, teammate owner-scoping, and the block-vs-fail-open split of the `hooks/open_work.py` substrate, plus the v3.64.0 abandonment discrimination (inherited-stale tasks surface, never block; the retire surface refuses live tasks without --force); path-traversal sanitization); cross-component consistency (the two evidence hooks cannot drift; the Stop hook's origin set matches the pipeline; no unregistered skills/agents/commands); the setup + MemPalace install scripts; the `scripts/notify/notify.py` notifier (config load/validate, Gmail + SendGrid message construction with mocked transport, event dispatch, secret resolution, CLI + failure isolation) and its pipeline wiring; the v1.0.0 teams-mode detection helper (`scripts/setup/teams_mode.py`) + the cross-session lock layer (`hooks/locks.py`); the v1.1.0 worktree-aware state-resolution helper (`scripts/setup/worktree_paths.py`) including the cross-worktree lock-coordination integration test (acquire from a real `git worktree add`-created worktree blocks an intersecting acquire from main with the default `locks_dir`); the v1.2.0+v1.3.0+v3.6.0 worktree-lifecycle helper (`scripts/setup/worktree_lifecycle.py`) including `create_run_worktree` (now at the v3.6.0 hidden per-project container layout `<parent>/.<repo>-worktrees/<slug>/`) + collision handling, `current_worktree_is_run` True / False detection, `current_run_slug` extraction, `cleanup_run_worktree` with + without branch removal, the v1.3.0 auto-cleanup helpers (`list_merged_architect_team_worktrees` with `exclude_current` safeguard; `cleanup_merged_worktrees` with `dry_run` preview; end-to-end cleanup-only-removes-merged), and the v3.6.0 `finalize_run_worktree` end-of-run merge check (remove-when-merged / warn-when-unmerged / no-op-on-non-run-branch) + dual-layout (old-flat + new-container) slug derivation & sweep, and the v3.7.0 auto-merge-to-main helpers (`list_run_branches` per-branch merged / cleanly-mergeable status excluding non-architect-team branches; `merge_branch_to_main_and_prune` clean-merge→push→delete-branch→remove-worktree with conflict-abort-changes-nothing and never-`--force` safety)) — all exercising real `git init` + `git worktree add` fixtures with no git mocks; and the no-arbitrary-timers, diagnostic-research, MemPalace-integration, integration-testing, expensive-verification, editability-completeness, readme-styling, design-baseline-migration, visual-verification-team, producer-checker-enforcement, mempalace-mine-syntax, documentation-currency, project-email-notifications, ui-interaction-fidelity, email-testing, proposal-refiner, ux-test-builder, bug-fix-pipeline, code-path-witness, mini-architect-team-pipeline, agent-teams-mode, scope-discipline (v1.4.0 — `tests/test_scope_discipline.py` audits the canonical `## Scope discipline` section in `common-pipeline-conventions/SKILL.md`, the 6 parity-implying verbs documented in the section + the bug-classifier action-verb section, the 3 pipeline body references, the prompt-refiner 6th `scope-fidelity` axis + grade-schema, the proposal-refiner Phase R2 documentation of the axis + new weights, and the system-architect Master Review Audit + Phase 2 architect brief scope-narrowing checks), and playwright-suite-intuition-lifecycle (v3.65.0 — the `intuition-map-lifecycle` ensure/grow/bug-path-upsert engine, the `suite-manifest.json` schema engine + `verify-suite-manifest` with default-deny prod safety, the 8 thin lane hooks, and the run-driving registry additions — 4 new test files), and executed-diagnosis-and-no-limits (v3.66.0 — the `verify-diagnosis-falsified` tool + the `_audit_diagnosis_falsified` Stop arm, the `verification-planning` skill + the `stuck-without-verification-plan` gap, and the no-self-imposed-limits corpus sweep — 3 new test files) disciplines. **8275 tests pass (+ 6 skipped, 0 failed, across 262 top-level test files — disk-anchored via `git ls-files 'tests/test_*.py'`; measured on Windows/win32 at v3.66.0, recorded under `docs/measurements/` as the release's closing act; the win32/darwin skip-profile difference is real — a darwin host without PyYAML reports 16 skips, 14 PyYAML-gated + 2 archived-coverage-map, and a PyYAML-present host reports fewer).**
 
 ### Bumping versions
 
@@ -1267,13 +1268,13 @@ Tests validate: plugin/marketplace JSON; all 55 skill frontmatters; all 39 agent
 ```
    ▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰
 
-   ◆       v3.65.0 ─ playwright-suite-intuition-lifecycle — the
-           interaction-intuition map becomes a guaranteed, growing,
-           debugging-fed asset (ensure / grow / bug-path-upsert), and
-           the Playwright suite becomes a durable artifact: a committed
-           suite-manifest.json, persona-grouped dev/prod projects,
-           default-deny production safety, and full integration running
-           the ENTIRE dev suite. The 7th pipeline-driving skill
+   ◆       v3.66.0 ─ executed-diagnosis-and-no-limits — a cause is a
+           hypothesis until it survives an EXECUTED falsification (the
+           24th Layer-3 tool verify-diagnosis-falsified + a Stop-hook
+           arm hold the run open until it does); "where to verify" is
+           an enumerate-and-choose decision with a recorded plan; and
+           ETHOS principle 8 — no self-imposed turn, budget, cycle, or
+           time limits; the ONLY limits are the user's explicit ones
 
            Full release timeline (every version) → docs/RELEASE_HISTORY.md
 

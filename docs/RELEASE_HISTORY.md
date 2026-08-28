@@ -10,6 +10,7 @@ The formal per-version log is [`CHANGELOG.md`](../CHANGELOG.md); this file is th
 
 Every release, newest first — the one-line index the README used to carry. Full detail for each is in the per-release sections below and in [`CHANGELOG.md`](../CHANGELOG.md).
 
+- `v3.66.0` — executed-diagnosis-and-no-limits
 - `v3.65.0` — playwright-suite-intuition-lifecycle
 - `v3.64.0` — inherited-task-debt
 - `v3.63.0` — bauplan-skills-dependency
@@ -162,6 +163,24 @@ Every release, newest first — the one-line index the README used to carry. Ful
 - `v0.2.3` — path-traversal hardening + escalation policy
 - `v0.2.0` — orchestrator skill rename (command/skill collision)
 - `v0.1.0` — initial release
+
+```
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+█▓▒░  ◆  NEW IN v3.66.0  ◆  ░▒▓█
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+```
+
+### v3.66.0 — executed-diagnosis-and-no-limits: a cause is a hypothesis until it survives an executed falsification
+
+Two field symptoms drove it: the pipeline offering *"I need to wait before deploying to prod"* as a verification plan when cheaper faithful venues existed, and diagnoses that read like conclusions — *"I researched it and nobody concluded"*, *"I was wrong, it was never X"* — and turned out to be guesses. Reviewing the prompts and the architecture found three structural causes, all closed without dispatching the pipeline (the pipeline was the surface under repair).
+
+**Diagnosis now executes.** The diagnostic researchers were read-only, the architect was forbidden to pick a cause, the review loop capped itself at three rounds and ended in "cannot converge", and Phase B3 emailed the top-ranked guess as the root cause. Now every falsification test the researcher writes is RUN, hypotheses rank by executed evidence, the architect's review has no cycle cap, and a root-cause claim must carry an executed falsification or be labeled a hypothesis. Enforced, not requested: the 24th Layer-3 tool `verify-diagnosis-falsified` reads the architect's `diagnostic-plan-<ts>.json` sidecar, and the new Stop-hook arm `_audit_diagnosis_falsified` holds the run open until it validates.
+
+**"Where to verify" becomes a decision.** The new `verification-planning` skill makes every verification an enumerate-and-choose step — local run, dev, replay, seeded fixture, production — proving which venue each claim depends on, running the cheapest faithful one first, and recording the plan. A `cannot-verify-without-deploy` verdict with no such plan is now a measured gap (`stuck-without-verification-plan`), and providing the venue is the run's job.
+
+**No self-imposed limits.** ETHOS principle 8, *Understand before acting*, is compiled into all 39 agents: explore until you fully understand — no self-imposed turn count, budget, cycle cap, or time box, and none imposed on a dispatched agent; the only limits are the ones the user explicitly states. Thirteen sites across the corpus that rationed themselves were inverted, and a sweep test keeps the class from returning. The conventions file gains a ranked *Read this first* section so the rules that matter stop being buried.
+
+Full detail in [`CHANGELOG.md`](../CHANGELOG.md).
 
 ```
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

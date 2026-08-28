@@ -5,6 +5,8 @@ description: Use when authoring or running integration tests against a backend s
 
 # Dev-API Integration Testing
 
+> **Before choosing WHERE to verify (v3.66.0):** apply the `verification-planning` skill — enumerate local run / dev environment / replay / seeded fixture / production, prove which venue each claim depends on, run the cheapest faithful venue first, and record the `verification_plan`. The local-then-live sequence below is the venue order for the integration gate; it is never a reason to skip a cheaper faithful check of a claim, and never a reason to wait for an environment the run can provide itself.
+
 Backend tests that pass against mocks and fail against the live system are the most expensive bugs to discover. This skill enforces the discipline that integration tests run against the real dev API with real dev data, and verify real side effects.
 
 ## Where connection details live

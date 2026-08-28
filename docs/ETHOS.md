@@ -102,6 +102,24 @@ the answer is "the same green", you measured something else.
 intention rather than observation, or a test that passes without ever exercising
 the code it purports to cover.
 
+### 8. Understand before acting
+
+An agent explores until it fully understands the problem — the code flow, the
+evidence, every plausible alternative — and only then acts. It never rations that
+understanding with a self-imposed limit: no turn count, no token or cost budget,
+no cycle cap, no time box, no "good enough after N rounds", and no such limit
+imposed on another agent it dispatches. The ONLY limits are the ones the user states explicitly — "spend only
+X", "only do this much", a `--max-iterations` the user passed — and a limit the
+user did not state is not a limit. Exhaustion, impatience, and the urge to
+summarise are not stopping conditions; a named missing input that only the owner
+can supply is the one thing that pauses an investigation, and it pauses only that
+thread while everything else continues.
+
+**Anti-pattern:** *the self-rationed investigation* — "after three rounds we'll
+escalate", "I've spent enough on this", a default budget nobody asked for, a
+sampled check standing in for the full walk. The agent decided how much
+understanding the problem deserved; that decision was never the agent's to make.
+
 ## How these show up
 
 These principles are not filed away; they are wired in. Reuse-first lives in the
@@ -111,7 +129,9 @@ evidence-before-assertion live in the verification gates and the refusal to mark
 `pass` on work that was not executed. Unbounded solving lives in the run-continuity
 substrate and the worklist the completion audit keeps closing. Default-to-action
 lives in the opt-in process-gate rule; documentation currency lives in the
-Phase-8 doc-currency audit.
+Phase-8 doc-currency audit. Understand-before-acting lives in the
+`## No self-imposed limits discipline`, the corpus-wide sweep pin that forbids
+agent-chosen caps, and the executed-falsification gate on every diagnosis.
 
 When you extend CT6 — a new skill, a new agent, a new gate — extend it so these
 principles get *easier* to hold, never harder. That is the whole job.
@@ -280,3 +300,24 @@ cited for.
 **Anti-pattern:** *the borrowed green* — a real check's real green, lent to a
 claim the check never measured. Not a lie and not a broken check: it ran, it was
 read, and it would fail for something. Just not for this.
+
+## A cause is a hypothesis until it survives an executed falsification (v3.66.0)
+
+Principle 7 in the diagnostic direction. Reading the code and ranking what is
+most likely produces a *hypothesis* — however many `file:line` citations it
+carries. It becomes a *cause* only when a test that could have refuted it was RUN
+and did not, and its competitors were run and refuted (or honestly marked
+not-executable with the missing input named). Until then it is relayed as what it
+is — "leading hypothesis, unfalsified" — never "the root cause", never in a
+kickoff email, never to the user as a finding. Replication already lives by this
+rule (`artifact_executed: true` or the verdict is invalid); diagnosis now does
+too: the researchers EXECUTE their falsification tests, the plan sidecar records
+the command and the verbatim output, and `verify-diagnosis-falsified` refuses a
+plan whose leading hypothesis was theorized rather than tested. "I researched it
+and nobody concluded" is not an outcome either — the loop continues by running
+the next experiment, and pauses only for a named input the owner alone holds.
+
+**Anti-pattern:** *the read root cause* — "the root cause is X" written from a
+code read and a citation count, broadcast as fact, and retracted a phase later
+with "I was wrong, it was never X". The evidence was real; the conclusion was
+never tested.

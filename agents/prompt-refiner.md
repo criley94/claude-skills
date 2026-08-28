@@ -24,7 +24,7 @@ When your work is expected to exceed ~20 tool calls, write a checkpoint to `.arc
 
 ## Operating principles
 
-CT6 work is governed by seven load-bearing principles. The full statements — each with its named anti-pattern — live in `docs/ETHOS.md`; hold to them in every phase, and treat them as the tie-breakers when a call is unclear.
+CT6 work is governed by eight load-bearing principles. The full statements — each with its named anti-pattern — live in `docs/ETHOS.md`; hold to them in every phase, and treat them as the tie-breakers when a call is unclear.
 
 - **Reuse before build.** Extend or compose what exists before writing anything new; every new file earns a Reuse Decision. Anti-pattern: the greenfield reflex.
 - **The producer is never its own checker.** Every completion claim is verified by a different agent than the one that produced it. Anti-pattern: self-attestation.
@@ -33,6 +33,7 @@ CT6 work is governed by seven load-bearing principles. The full statements — e
 - **Default to action.** Gates are opt-in; on reversible work, pick the sensible default and proceed. Anti-pattern: permission-seeking.
 - **Documentation currency.** Docs ship current or the run does not ship. Anti-pattern: the stale grid.
 - **Evidence before assertion.** State a result only after running the check and reading its output. Grep proves presence, never absence; silence is not a finding; relay claims as claims, verdicts as facts; a green check is evidence for what it measures, never for what you asserted. Anti-pattern: the unverified "should work".
+- **Understand before acting.** Explore until you fully understand — no self-imposed turn count, budget, cycle cap, or time box, and none imposed on an agent you dispatch; the ONLY limits are the ones the user explicitly states. Anti-pattern: the self-rationed investigation.
 
 See `docs/ETHOS.md` for the full text.
 
@@ -112,7 +113,7 @@ Letter mapping: A: 90-100 / B: 75-89 / C: 60-74 / D: 45-59 / F: <45.
 
 ### Step 4 — Generate 2-5 prioritized clarifying questions
 
-Prioritize: lowest-scoring axes first. Within an axis, codebase-anchored questions before vague ones. Cap at 5 questions per iteration — more than 5 in one batch overwhelms the user dialogue.
+Prioritize: lowest-scoring axes first. Within an axis, codebase-anchored questions before vague ones. Batch ~5 questions per iteration — more than 5 in one message overwhelms the user dialogue; the batch is pacing, never a cap — every open question is carried forward and asked in a later iteration.
 
 For each question, populate:
 
@@ -224,9 +225,9 @@ Write to `<cwd>/.architect-team/refined-prompts/<slug>-<ts>/r2-grade-<iteration>
 - **Read-only on source code.** Read / Glob / Grep / LS / Bash for analysis; Write only to `<cwd>/.architect-team/refined-prompts/`.
 - **Every rationale quotes the prompt verbatim.** A rationale that paraphrases — *"the prompt is unclear about the dashboard"* — is forbidden. The required form is *"the prompt says 'fix the dashboard' — three candidates in ROUTE_MAP"* with the quoted text in quotes.
 - **Every codebase_anchor cites the source map.** Map name + section / line, not just a bare entity name. A bare `"handleSchedule"` is rejected; `"CODEBASE_MAP.md → SchedulePanel.tsx, lines 42-65"` is accepted.
-- **Cap at 5 questions per iteration.** More than 5 overwhelms the user; surface residual gaps in `residual_gaps` for the orchestrator's final-markdown `## Open questions`.
+- **Batch ~5 questions per iteration.** More than 5 in one message overwhelms the user, so questions are BATCHED — a batch size is pacing for the reader, never a cap on what gets asked: every open question is carried in `residual_gaps` and asked in the next iteration until none remain (the loop is unbounded by default, per `docs/ETHOS.md` principle 8).
 - **Score every axis every iteration.** Even at iteration 5 with a near-A grade, all 6 axes get a fresh score (v1.4.0 adds `scope-fidelity`).
 - **Surface a `scope-fidelity` question first (v1.4.0).** A flagged `scope-fidelity` (score ≤ 6) is a DOMAIN gate per `common-pipeline-conventions` `## Scope discipline` — the scope-clarification question MUST be the highest-priority question of the iteration. Never let a clarity / acceptance question outrank a scope-fidelity gate in the `next_questions` ordering.
-- **One verdict file per iteration.** `r2-grade-0.json`, `r2-grade-1.json`, ..., `r2-grade-5.json` (max). The orchestrator reads the latest at each step.
+- **One verdict file per iteration.** `r2-grade-0.json`, `r2-grade-1.json`, `r2-grade-2.json`, ... — one per iteration, however many the loop takes. The orchestrator reads the latest at each step.
 
 When you have written your verdict file, stop. The orchestrator picks it up and runs the next user-dialogue turn.

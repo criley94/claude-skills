@@ -78,10 +78,15 @@ def test_impact_set_kinds_documented(plugin_root: Path) -> None:
 
 
 def test_one_level_importer_bound(plugin_root: Path) -> None:
-    """The impact-set expansion must be bounded at ONE level of importers (not transitive)."""
+    """v3.66.0 — the impact set is computed TRANSITIVELY (every importer of an
+    importer); execution ORDER handles cost, never a truncated set. (Inverted from
+    the pre-v3.66.0 one-level bound — a self-imposed limit rationalised as an
+    'acceptable trade-off' the user never accepted.)"""
     _, body = _read(plugin_root)
-    assert "one level" in body.lower() or "one-level" in body.lower() or "not recurse" in body.lower(), (
-        "agent must document the one-level importer-expansion bound"
+    low = body.lower()
+    assert "transitive" in low, "agent must compute the impact set transitively"
+    assert "one-level importer expansion" not in low and "bounded at one level" not in low, (
+        "the one-level bound is a self-imposed limit and must be gone"
     )
 
 

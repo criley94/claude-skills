@@ -125,7 +125,7 @@ For each batch of questions:
 6. Loop until any termination condition:
    - **User-confirmed**: the user types `ship it` / `good` / `proceed` / `go` / `looks good` / `that's clear` (or natural-language equivalent — match liberally).
    - **A-grade reached**: overall_score ≥ 90 AND the user has not requested more iteration AND the previous question batch is resolved.
-   - **Iteration ceiling**: 5 iterations completed. Surface the residual ambiguities and ask explicitly: *"After 5 iterations the grade is <letter>. Residual gaps: <list>. Proceed anyway, or one more iteration?"* If the user says proceed, exit the loop with the current `working_prompt` AND the residual-gap list captured as `## Open questions` in the final markdown.
+   - **User-set cap reached** (ONLY when the user passed `--max-iterations N`; the loop is unbounded by default — no agent-chosen ceiling, per `docs/ETHOS.md` principle 8): surface the residual ambiguities and ask explicitly: *"After N iterations the grade is <letter>. Residual gaps: <list>. Proceed anyway, or one more iteration?"* If the user says proceed, exit the loop with the current `working_prompt` AND the residual-gap list captured as `## Open questions` in the final markdown.
 
 **Display discipline.** Every iteration must show:
 - Current grade table
@@ -203,7 +203,7 @@ Body = the structured sections from Phase R5.
 1. **The refiner refines; it does not implement.** This skill produces a refined PROMPT — never code, never an OpenSpec proposal, never a fix. The downstream pipelines do the implementation work.
 2. **User authority is absolute on clarity.** The agent's grade is advisory; the user's "ship it" terminates the loop even at C-grade. A user who knowingly proceeds on a lower grade gets the residual gaps captured in `## Open questions`, with explicit acknowledgment.
 3. **Codebase-grounded suggestions, not invented ones.** When the agent suggests a touchpoint, it MUST cite the map entry (`ROUTE_MAP.md` line, `INTEGRATION_MAP.md` section, `CODEBASE_MAP.md` module). A suggestion that doesn't trace to a map entry is a guess and is forbidden.
-4. **Iteration ceiling = 5.** No more, no less. Past 5 the conversation becomes architectural design, which is the downstream pipeline's job, not the refiner's.
+4. **The loop is unbounded by default.** It runs until the user is satisfied or the grade is A; the ONLY cap is a `--max-iterations` the user passed explicitly (no iteration cap the agent chooses — `docs/ETHOS.md` principle 8). When the conversation drifts into architectural design, say so and hand that part to the downstream pipeline — that is a scope observation, never a stopping count.
 5. **No source-code edits in this skill.** The `prompt-refiner` agent is read-only on source. The orchestrator writes ONLY to `<cwd>/.architect-team/refined-prompts/`. Source-code, test, OpenSpec, plugin.json edits during refinement are forbidden — they happen downstream after refinement exits.
 
 ## Relationship to downstream pipelines
