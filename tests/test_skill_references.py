@@ -88,7 +88,14 @@ EXTRACTIONS = {
     #     suite pins; `### Parallel lanes (v3.16.0)` stays INLINE verbatim
     #     because tests/test_parallel_lane_inject.py pins its mechanics there.
     #     Same mechanism as v3.63.0: extraction, not a raised cap.
-    "common-pipeline-conventions": ("auto-worktree-lifecycle", 259290, 257358),
+    #   v3.67.0 transition:   257358 -> 258527 (+1169, cap still UNCHANGED)
+    #     ADDED `## Git commit identity discipline (v3.67.0)` in the house
+    #     pointer shape — heading + STOP pointer to the NEW
+    #     references/git-commit-identity.md + a one-paragraph rule — plus its
+    #     Reference-index row. Fits inside the room the v3.66.0 extraction
+    #     made; 763 bytes of headroom remain, so the NEXT addition pays by
+    #     extraction again.
+    "common-pipeline-conventions": ("auto-worktree-lifecycle", 259290, 258527),
 }
 
 # the STOP pointer's cited-path grammar: > **STOP.** ... Read `<path>` ...

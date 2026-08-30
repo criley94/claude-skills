@@ -766,6 +766,28 @@ def list_run_branches(
     return descriptors
 
 
+def _commit_identity_args(toplevel) -> list:
+    """The v3.67.0 recorded commit identity (`<toplevel>/.architect-team/
+    git-identity.json`) as git `-c` options, or `[]` when unrecorded / malformed.
+    Read directly rather than through hooks/git_identity.py so this setup helper
+    keeps its zero-import contract; the two readers agree on the file shape."""
+    import json as _json
+
+    try:
+        data = _json.loads(
+            (Path(toplevel) / ".architect-team" / "git-identity.json").read_text(encoding="utf-8")
+        )
+        name, email = data.get("name"), data.get("email")
+        if (
+            isinstance(name, str) and name.strip()
+            and isinstance(email, str) and email.strip()
+        ):
+            return ["-c", f"user.name={name.strip()}", "-c", f"user.email={email.strip()}"]
+    except (OSError, ValueError, AttributeError):
+        pass
+    return []
+
+
 def merge_branch_to_main_and_prune(
     branch: str,
     worktree_path: Optional[str] = None,
@@ -828,12 +850,15 @@ def merge_branch_to_main_and_prune(
     if checkout.returncode != 0:
         return {**base, "reason": "checkout-failed"}
 
-    # Merge --no-ff. An unexpected conflict aborts and changes nothing.
+    # Merge --no-ff. An unexpected conflict aborts and changes nothing. The
+    # merge commit carries the checkout's RECORDED identity (v3.67.0 — the
+    # helper runs from the main checkout, so the record is read there).
     merge = _git_run(
         [
             "git",
             "-C",
             str(toplevel),
+            *_commit_identity_args(toplevel),
             "merge",
             "--no-ff",
             branch,

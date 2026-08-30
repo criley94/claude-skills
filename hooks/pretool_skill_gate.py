@@ -123,6 +123,13 @@ except ImportError:  # pragma: no cover - bare-module shape
         import run_continuity as _rc  # type: ignore[no-redef]
     except ImportError:  # pragma: no cover - substrate unavailable
         _rc = None  # type: ignore[assignment]
+try:  # package shape (v3.67.0 — the commit-identity substrate behind arm 4)
+    from hooks import git_identity as _gi
+except ImportError:  # pragma: no cover - bare-module shape
+    try:
+        import git_identity as _gi  # type: ignore[no-redef]
+    except ImportError:  # pragma: no cover - substrate unavailable
+        _gi = None  # type: ignore[assignment]
 
 
 # Pipeline-DRIVING skills. A request is GATED only when its expected skills
@@ -729,6 +736,124 @@ def _task_delete_check(payload: dict[str, Any]) -> tuple[int, str]:
         return 0, ""
 
 
+# --------------------------------------------------------------------------- #
+# Arm 4 (v3.67.0) — commit identity during an active run
+# --------------------------------------------------------------------------- #
+#
+# A run commits as the PERSON driving it, and the tool never decides who that
+# is. The front-door commands resolve the checkout's identity once (asking the
+# user when nothing is recorded — a domain gate) into
+# `<main-worktree>/.architect-team/git-identity.json`; every commit-authoring
+# git command (`commit` / `merge` / `revert`) must then carry it explicitly —
+# the `git_identity.py git --` wrapper or `-c user.name= -c user.email=`. This
+# arm refuses, during an ACTIVE run, a commit-authoring Bash command that has
+# no record to carry, carries none, or carries a DIFFERENT identity. A
+# hardcoded maintainer override shipped in a skill body for 60+ releases and
+# committed as one person on everyone's machine; this arm is what makes the
+# rule structural instead of remembered.
+#
+# Same deliberate shape as arm 3 (each pinned in tests/test_git_identity.py):
+#   * payload-only (tool_name + tool_input.command + cwd + marker) — NO
+#     transcript dependence;
+#   * scoped to an ACTIVE, non-stale run marker — a plain session's own git
+#     usage is never hijacked;
+#   * `escalation-pending.md` does NOT stand it down (agent-writable);
+#   * its OWN kill-switch only — the HUMAN's lever.
+GIT_IDENTITY_GATE_DISABLE_ENV = "CT6_GIT_IDENTITY_GATE_DISABLED"
+
+
+def _git_identity_gate_disabled() -> bool:
+    """Truthy per the house kill-switch rule: anything but unset / 0 / false / no."""
+    v = os.environ.get(GIT_IDENTITY_GATE_DISABLE_ENV, "").strip().lower()
+    return v not in ("", "0", "false", "no")
+
+
+def _format_identity_block(cwd: str, command: str, reason: str, record: dict[str, Any] | None) -> str:
+    wrapper = (
+        f"python3 \"${{CLAUDE_PLUGIN_ROOT}}/hooks/git_identity.py\" --cwd \"{cwd}\" git -- <the same git arguments>"
+    )
+    head = (
+        "CT6 v3.67.0 PreToolUse guardrail BLOCKED — a commit-authoring git command "
+        "without the checkout's recorded identity.\n"
+        "\n"
+        f"  - tool about to fire: Bash\n"
+        f"  - command: {command.strip()[:300]}\n"
+        f"  - reason: {reason}\n"
+        "\n"
+    )
+    if record is None:
+        return head + (
+            "No commit identity is recorded for this checkout, and the tool never "
+            "decides who a commit is attributed to.\n"
+            "\n"
+            "REQUIRED ACTION: run "
+            f"`python3 \"${{CLAUDE_PLUGIN_ROOT}}/hooks/git_identity.py\" --cwd \"{cwd}\" resolve --json`. "
+            "A `candidate` (from the repo's local or global git config) must be CONFIRMED "
+            "with the user via AskUserQuestion before it is recorded; `missing` means ASK "
+            "the user for their name + email. Then record the answer with "
+            "`git_identity.py set --name \"<name>\" --email \"<email>\" --source <asked|"
+            "confirmed-local-git-config|confirmed-global-git-config>` and re-issue the "
+            "command carrying it (the wrapper below, or `-c user.name=... -c user.email=...`). "
+            "NEVER guess, NEVER reuse another person's identity, NEVER write the user's git config.\n"
+            f"\n  {wrapper}\n"
+            "\n"
+            f"If a human genuinely wants this gate off: {GIT_IDENTITY_GATE_DISABLE_ENV}=1 "
+            "in the environment Claude Code was launched from is their lever."
+        )
+    return head + (
+        f"The checkout's recorded identity is {record['name']} <{record['email']}> "
+        f"(source: {record.get('source')}); every commit this run authors must carry it.\n"
+        "\n"
+        "REQUIRED ACTION: re-issue the command through the wrapper (it injects the "
+        "record) or add the explicit pair "
+        f"`-c user.name=\"{record['name']}\" -c user.email=\"{record['email']}\"` "
+        "before the subcommand:\n"
+        f"\n  {wrapper}\n"
+        "\n"
+        "A DIFFERENT identity is the HUMAN's decision: ask the user, then "
+        "`git_identity.py set ...` records it for this checkout. "
+        f"{GIT_IDENTITY_GATE_DISABLE_ENV}=1 (launch environment) is the human's lever "
+        "for the gate itself."
+    )
+
+
+def _git_identity_check(payload: dict[str, Any]) -> tuple[int, str]:
+    """Refuse a commit-authoring Bash command in an active run that lacks or
+    contradicts the recorded identity. Fail-open on every uncertainty EXCEPT
+    the transcript (deliberately never consulted): no command, no cwd, no
+    marker, non-active / stale marker, substrate unavailable, internal error."""
+    if _rc is None or _gi is None:
+        return 0, ""
+    try:
+        if _git_identity_gate_disabled():
+            return 0, ""
+        inp = payload.get("tool_input") or payload.get("input") or payload.get("args")
+        if not isinstance(inp, dict):
+            return 0, ""
+        command = inp.get("command")
+        if not isinstance(command, str) or not command.strip():
+            return 0, ""
+        if not _gi.is_commit_authoring_command(command):
+            return 0, ""
+        cwd = payload.get("cwd")
+        if not isinstance(cwd, str) or not cwd.strip():
+            return 0, ""
+        marker = _rc.read_marker(cwd)
+        if not isinstance(marker, dict) or marker.get("status") != "active":
+            return 0, ""
+        if _rc.marker_is_stale(marker):
+            return 0, ""
+        record = _gi.read_record(cwd)
+        if record is None:
+            return 2, _format_identity_block(cwd, command, "no recorded identity for this checkout", None)
+        ok, reason = _gi.check_command(command, record)
+        if ok:
+            return 0, ""
+        return 2, _format_identity_block(cwd, command, reason, record)
+    except Exception:
+        return 0, ""
+
+
 def record_engagement(payload: dict[str, Any]) -> None:
     """Engage/refresh the active-run marker when a run-driving Skill has RUN.
 
@@ -797,6 +922,13 @@ def check_payload(payload: dict[str, Any]) -> tuple[int, str]:
         # (test_blocks_build_and_dispatch_tools_allows_setup_tools) before it
         # ever shipped.
         code, msg = _task_delete_check(payload)
+        if code:
+            return code, msg
+    if tool == "Bash":
+        # Arm 4 (v3.67.0) — commit identity during an active run. ADDITIVE:
+        # Bash is not a `_BLOCKED_TOOLS` member, so when this arm does not block
+        # the payload falls through to the normal always-allowed path below.
+        code, msg = _git_identity_check(payload)
         if code:
             return code, msg
     if tool == "Skill":
