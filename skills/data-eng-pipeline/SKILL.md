@@ -123,7 +123,7 @@ Phase **D8 is the main pipeline's Phase 8 close-out run verbatim** — the docum
 - `intake-and-mapping` (Phase D−1A) — reused verbatim. Same maps, same freshness rules.
 - `data-dictionary` (Phase D−1B, D7) — the deterministic dictionary engine's contract; consulted at D−1 (via the knowledge server) and rebuilt at D7.
 - `data-lineage-mapping` (Phase D2–D6) — every transformation's lineage emission traces to this discipline.
-- `documentation-currency` (Phase D8) — the doc-currency gate before the auto-commit, same as the main pipeline.
+- `documentation-currency` (Phase D8) — the doc-currency gate before the auto-commit, same as the main pipeline. The D8 commit is authored as the checkout's RECORDED person per `common-pipeline-conventions` `## Git commit identity discipline (v3.67.0)` (the `git_identity.py git --` wrapper or the explicit `-c user.name= -c user.email=` pair) — never a default author.
 
 ## Same input forms as architect-team-pipeline
 

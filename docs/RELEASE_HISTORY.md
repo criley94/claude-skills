@@ -10,6 +10,7 @@ The formal per-version log is [`CHANGELOG.md`](../CHANGELOG.md); this file is th
 
 Every release, newest first — the one-line index the README used to carry. Full detail for each is in the per-release sections below and in [`CHANGELOG.md`](../CHANGELOG.md).
 
+- `v3.67.0` — git-commit-identity
 - `v3.66.0` — executed-diagnosis-and-no-limits
 - `v3.65.0` — playwright-suite-intuition-lifecycle
 - `v3.64.0` — inherited-task-debt
@@ -163,6 +164,22 @@ Every release, newest first — the one-line index the README used to carry. Ful
 - `v0.2.3` — path-traversal hardening + escalation policy
 - `v0.2.0` — orchestrator skill rename (command/skill collision)
 - `v0.1.0` — initial release
+
+```
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+█▓▒░  ◆  NEW IN v3.67.0  ◆  ░▒▓█
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+```
+
+### v3.67.0 — git-commit-identity: a run commits as the person driving it
+
+A shipped skill body carried one maintainer's `git -c user.name=… -c user.email=…` override for sixty-odd releases — so every mini run on every user's machine committed as that maintainer — and the main pipeline's alternative was "whatever git config finds", which on a fresh clone is nothing and on a shared machine is someone else. Neither is a decision the tool may make for the user.
+
+**The front door asks, once.** Every lane command (`/architect-team`, `bug-fix`, `mini`, `data-eng`, `ux-test`, `playwright-suite`) now resolves the checkout's commit identity before anything touches git: a recorded `<main-worktree>/.architect-team/git-identity.json` is used silently; a candidate from the repo's local or global git config is CONFIRMED with the user — never adopted (the very first checkout it ran on offered a typo'd name); nothing found means the user is asked for name + email. A domain gate that fires regardless of `--proposal-first`, records `source` as its evidence trail, never writes the user's git config, and never names a default.
+
+**Every commit carries it.** The Phase 8 / B8 / M7 / D8 / U9 / P9 steps and the auto-merge helper author commits through the new `hooks/git_identity.py` substrate — `git_identity.py git -- commit …` injects the record and REFUSES when there is none — and `pretool_skill_gate.py` gains Arm 4: during an active run, a commit-authoring `git` command that lacks or contradicts the record is blocked with the exact command to use (`CT6_GIT_IDENTITY_GATE_DISABLED` is the human's lever). A sweep test keeps any person's name out of every shipped surface.
+
+Full detail in [`CHANGELOG.md`](../CHANGELOG.md).
 
 ```
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░

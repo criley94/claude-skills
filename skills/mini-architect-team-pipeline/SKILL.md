@@ -317,7 +317,7 @@ Before staging, run `openspec archive <slug>` to merge the change's spec deltas 
    Dispatch-Mode: <teams|subagents>
    Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
    ```
-   Author override (this repo): `git -c user.name="Paul Ingram" -c user.email="paulingram@users.noreply.github.com" commit ...`
+   Identity (v3.67.0): the commit is authored as the checkout's RECORDED person — `python3 "${CLAUDE_PLUGIN_ROOT}/hooks/git_identity.py" --cwd <repo-root> git -- commit ...` (or the explicit `-c user.name="<name>" -c user.email="<email>"` pair from `.architect-team/git-identity.json`) per `common-pipeline-conventions` `## Git commit identity discipline (v3.67.0)`. Never a hardcoded author, never ambient git config alone; the front door asked on first use, and the PreToolUse gate refuses a commit that lacks or contradicts the record.
 
    The `Dispatch-Mode:` trailer (v1.5.0) is derived from
    `.architect-team/intake-state.json`'s `dispatch_mode` field — recorded

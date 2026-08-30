@@ -26,6 +26,20 @@ The banner is informational, not gating. A subprocess failure surfaces a
 one-line note and the run continues regardless. The dispatch-mode decision
 itself is unchanged from v1.0.0.
 
+## Commit identity (v3.67.0) — runs after the banner, before any git-mutating step
+
+This run will author commits, and the tool never decides WHO they are attributed to. Resolve the checkout's recorded commit identity now — once per checkout, before the auto-cleanup / branch-reconciliation / auto-worktree steps below can touch git — per `common-pipeline-conventions` `## Git commit identity discipline (v3.67.0)` (full procedure: `skills/common-pipeline-conventions/references/git-commit-identity.md`):
+
+```bash
+$(command -v python3 || command -v python) "${CLAUDE_PLUGIN_ROOT}/hooks/git_identity.py" --cwd "<workspace>" resolve --json
+```
+
+- `"status": "recorded"` → say *"Committing as `<name> <email>` (recorded for this checkout)"* in one line and continue. No question.
+- `"status": "candidate"` → git's local or global config names someone; that is a PROPOSAL, never adopted silently. Ask via `AskUserQuestion`: *"Commit as `<name> <email>`? (found in this repo's local / your global git config)"* — options **Yes, record it for this checkout** / **No — I'll give a different name and email**. Then `$(command -v python3 || command -v python) "${CLAUDE_PLUGIN_ROOT}/hooks/git_identity.py" --cwd "<workspace>" set --name "<name>" --email "<email>" --source confirmed-local-git-config|confirmed-global-git-config` (or `--source asked` when they typed a different one).
+- `"status": "missing"` → ask via `AskUserQuestion` (free text): *"Who should this run's commits be attributed to? Reply `Name <email>`."* Then `set ... --source asked`.
+
+This is a **DOMAIN gate** (the v0.9.21 carve-out — the answer is the user's own fact): it fires regardless of `--proposal-first`, it fires ONCE per checkout (the record is the memory), and it NEVER guesses, NEVER reuses a name found in a skill, a CLAUDE.md or another repo, and NEVER writes the user's git config. Every commit-authoring git command this run issues then carries the record (the `git_identity.py git --` wrapper or the explicit `-c user.name= -c user.email=` pair); the PreToolUse gate refuses one that does not.
+
 ## Auto-cleanup of merged worktrees (v1.3.0) — runs first
 
 Before any argument parsing or pipeline invocation, sweep merged architect-team
